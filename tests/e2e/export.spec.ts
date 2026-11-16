@@ -73,7 +73,8 @@ test.describe("export", () => {
     const plain = xml
       .replace(/<\/w:p>/g, "\n")
       .replace(/<[^>]+>/g, "")
-      .replace(/[‎‏]/g, "")
+      .replace(/[\u200E\u200F\u2060]/g, "")
+      .replace(/\u00A0/g, " ")
       .replace(/&amp;/g, "&")
       .replace(/&quot;/g, '"');
     for (const s of FIXTURE_HE) expect(plain, `missing "${s}"`).toContain(s);

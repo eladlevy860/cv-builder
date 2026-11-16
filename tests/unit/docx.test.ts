@@ -14,7 +14,7 @@ type Para = { bidi: boolean; runs: Run[]; text: string };
 
 // Directional marks (LRM/RLM) are invisible; strip them before comparing text.
 const unescape = (s: string) =>
-  s.replace(/[\u200E\u200F\u2060]/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+  s.replace(/[\u200E\u200F\u2060]/g, "").replace(/\u00A0/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
 
 /** Minimal parse of word/document.xml: paragraphs, runs, run direction. */
 async function readDocx(buf: Buffer): Promise<Para[]> {
@@ -51,8 +51,12 @@ describe("DOCX export", () => {
     // Number-only LTR runs are pinned with LRM marks so Word keeps their order.
     const zip = await JSZip.loadAsync(buf);
     const xml = await zip.file("word/document.xml")!.async("string");
-    expect(xml).toContain("\u200E10/2023 – 02/2025\u200E");
-    expect(xml).toContain("\u200E(2023–2025)\u200E");
+    const plainXml = xml.replace(/\u2060/g, "").replace(/\u00A0/g, " ");
+    expect(plainXml).toContain("\u200E10/2023 – 02/2025\u200E");
+    expect(plainXml).toContain("\u200E(2023–2025)\u200E");
+    // …and never wrap inside: no ordinary spaces in number-only runs.
+    expect(xml).toContain("\u200E10/2023\u00A0–\u00A002/2025\u200E");
+    expect(xml).not.toContain("\u2060");
 
     const runs = withText.flatMap((p) => p.runs);
     // Hebrew words are in RTL runs; pure-LTR tokens are in LTR runs.

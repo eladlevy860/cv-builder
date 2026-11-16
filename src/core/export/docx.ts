@@ -18,6 +18,7 @@ import { FONTS } from "../model/fonts";
 import type { RichText, RTInline } from "../model/richtext";
 import type { CvDocument, Language, Section, SectionItem, SectionOf } from "../model/schema";
 import { extraLabel, levelLabel, renderableSections, toEntry, type Entry } from "../render/entries";
+import { getTemplateMeta } from "../../templates/meta";
 
 /**
  * Word export: a simplified single-column rendition of the CV with the same
@@ -57,17 +58,24 @@ const ptToTwip = (pt: number) => Math.round(pt * 20);
 /**
  * Word's "auto" line spacing is a multiple of the font's own line height
  * (≈1.15 em for Arial), while CSS line-height is a multiple of the font size.
- * Convert, then tighten by 10%: Word documents should come out slightly
- * shorter than the template so a one-page CV stays one page in Word too.
+ * After converting, vertical spacing is scaled by a density factor so the
+ * Word file comes out slightly shorter than the template (a one-page CV must
+ * stay one page in Word, without leaving a big gap at the bottom).
+ * Two-column templates need more compaction: their sidebar content becomes
+ * extra lines in Word's single column.
  */
-export const WORD_DENSITY = 0.9;
-function wordLineSpacing(cssLineHeight: number): number {
-  return Math.round(240 * (cssLineHeight / 1.15) * WORD_DENSITY);
+export function wordDensity(doc: CvDocument): number {
+  return getTemplateMeta(doc.templateId).columns === 2 ? DENSITY_TWO_COLUMNS : DENSITY_ONE_COLUMN;
+}
+export const DENSITY_ONE_COLUMN = 1.0;
+export const DENSITY_TWO_COLUMNS = 0.9;
+
+function wordLineSpacing(cssLineHeight: number, density: number): number {
+  return Math.round(240 * (cssLineHeight / 1.15) * density);
 }
 
 const LRM = "\u200E";
 const RLM = "\u200F";
-const WJ = "\u2060";
 
 /**
  * Word and LibreOffice do not isolate runs the way browsers do: a number-only
@@ -85,7 +93,16 @@ function pin(text: string, runRtl: boolean, paragraphRtl: boolean): string {
     return m + text + m;
   }
   const m = runRtl ? RLM : LRM;
-  return m + text + m;
+  return m + unbreakable(text) + m;
+}
+
+/**
+ * Number-only tokens ("10/2023 – 02/2025") must not wrap at their spaces:
+ * use no-break spaces. (Word joiners are not used: LibreOffice treats U+2060
+ * as a break opportunity.)
+ */
+function unbreakable(text: string): string {
+  return /^[\d\s/.:\u2013\-()+%]+$/.test(text) ? text.replace(/ /g, "\u00A0") : text;
 }
 const mmToPt = (mm: number) => mm * 2.835;
 
@@ -96,13 +113,11 @@ function runs(ctx: Ctx, text: string, opts: Omit<IRunOptions, "text"> = {}, base
   const font = (opts.font as string | undefined) ?? ctx.bodyFont;
   const parts = splitRuns(text, dir);
   return parts.map(
-    (r, i) =>
+    (r) =>
       new TextRun({
         size: ctx.size,
         ...opts,
-        // After an opening bracket, a word joiner stops editors from breaking
-        // the line between "(" and the pinned run that follows it.
-        text: (/[([{]$/.test(parts[i - 1]?.text ?? "") && r.rtl !== ctx.rtl ? WJ : "") + pin(r.text, r.rtl, ctx.rtl),
+        text: pin(r.text, r.rtl, ctx.rtl),
         rightToLeft: r.rtl,
         font: { ascii: font, hAnsi: font, cs: font },
         language: { value: ctx.lang === "he" ? "he-IL" : "en-US", bidirectional: "he-IL" },
@@ -126,7 +141,7 @@ function link(ctx: Ctx, value: string): ParagraphChild {
   const href =
     kind === "email" ? `mailto:${value}` : kind === "phone" ? `tel:${value.replace(/[^\d+]/g, "")}` : /^https?:/i.test(value) ? value : `https://${value}`;
   const display = kind === "url" ? value.replace(/^https?:\/\//i, "").replace(/\/$/, "") : value;
-  return new ExternalHyperlink({ link: href, children: [ltrRun(ctx, display, { color: ctx.accent.slice(1) })] });
+  return new ExternalHyperlink({ link: href, children: [ltrRun(ctx, display, { color: ctx.accent.slice(1), noProof: true })] });
 }
 
 function para(ctx: Ctx, children: ParagraphChild[], opts: Partial<ConstructorParameters<typeof Paragraph>[0] & object> = {}) {
@@ -211,7 +226,7 @@ function entryParagraphs(ctx: Ctx, e: Entry): Paragraph[] {
   out.push(
     para(ctx, head, {
       keepNext: true,
-      spacing: { before: Math.round(ctx.gap * 0.45), after: 0 },
+      spacing: { before: Math.round(ctx.gap * 0.5), after: 0 },
       tabStops: [{ type: TabStopType.END, position: ctx.contentWidth }],
     }),
   );
@@ -284,7 +299,7 @@ function headerParagraphs(ctx: Ctx): Paragraph[] {
   const contacts: ParagraphChild[][] = [];
   if (b.phone.trim()) contacts.push([link(ctx, formatIsraeliPhone(b.phone))]);
   if (b.email.trim()) contacts.push([link(ctx, b.email.trim())]);
-  if (b.city.trim()) contacts.push(field(ctx, b.city));
+  if (b.city.trim()) contacts.push(field(ctx, b.city, { noProof: true }));
   for (const l of b.links) if (l.url.trim()) contacts.push([link(ctx, l.url.trim())]);
   for (const x of b.extras) {
     if (!x.visible || !x.value.trim()) continue;
@@ -294,7 +309,7 @@ function headerParagraphs(ctx: Ctx): Paragraph[] {
   if (contacts.length) {
     const children: ParagraphChild[] = [];
     contacts.forEach((c, i) => {
-      if (i > 0) children.push(...runs(ctx, "  |  ", { color: "9CA3AF" }));
+      if (i > 0) children.push(...runs(ctx, "  |  ", { color: "9CA3AF", noProof: true }));
       children.push(...c);
     });
     out.push(
@@ -308,6 +323,7 @@ function headerParagraphs(ctx: Ctx): Paragraph[] {
 }
 
 export function buildDocx(doc: CvDocument): Document {
+  const density = wordDensity(doc);
   const page = PAGE[doc.theme.pageSize];
   const margin = convertMillimetersToTwip(doc.theme.pageMargins);
   const ctx: Ctx = {
@@ -318,7 +334,7 @@ export function buildDocx(doc: CvDocument): Document {
     bodyFont: officeFont(doc.theme.fontBody),
     headingFont: officeFont(doc.theme.fontHeading),
     size: Math.round(doc.theme.baseFontSize * 2),
-    gap: Math.round(ptToTwip(mmToPt(doc.theme.sectionSpacing)) * 0.75),
+    gap: Math.round(ptToTwip(mmToPt(doc.theme.sectionSpacing)) * 0.85 * density),
     contentWidth: convertMillimetersToTwip(page.w) - 2 * margin,
     listInstance: 0,
   };
@@ -332,7 +348,7 @@ export function buildDocx(doc: CvDocument): Document {
       default: {
         document: {
           run: { font: { ascii: ctx.bodyFont, hAnsi: ctx.bodyFont, cs: ctx.bodyFont }, size: ctx.size, color: "1F2937" },
-          paragraph: { spacing: { line: wordLineSpacing(doc.theme.lineHeight) } },
+          paragraph: { spacing: { line: wordLineSpacing(doc.theme.lineHeight, density) } },
         },
       },
     },

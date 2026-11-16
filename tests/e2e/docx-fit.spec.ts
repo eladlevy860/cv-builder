@@ -26,17 +26,23 @@ async function webPages(page: import("@playwright/test").Page, doc: CvDocument) 
   return page.evaluate(() => (window as unknown as { __RENDER_PAGES__: number }).__RENDER_PAGES__);
 }
 
-async function docxPages(doc: CvDocument, name: string) {
+/** Pages of the Word file and how far down its last page the text reaches (0–1 of the area inside the margins). */
+async function docxLayout(doc: CvDocument, name: string) {
   fs.mkdirSync(OUT, { recursive: true });
   const file = path.join(OUT, `${name}.docx`);
   fs.writeFileSync(file, await docxToBuffer(doc));
   execFileSync(soffice!, ["--headless", "--convert-to", "pdf", "--outdir", OUT, file], { stdio: "ignore", timeout: 120_000 });
   const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const pdf = await getDocument({ data: new Uint8Array(fs.readFileSync(file.replace(/\.docx$/, ".pdf"))) }).promise;
-  return pdf.numPages;
+  const last = await pdf.getPage(pdf.numPages);
+  const { height } = last.getViewport({ scale: 1 });
+  const margin = (doc.theme.pageMargins / 25.4) * 72;
+  const items = (await last.getTextContent()).items.filter((it) => "str" in it && it.str.trim());
+  const lowest = Math.min(...items.map((it) => ("transform" in it ? it.transform[5] : height)));
+  return { pages: pdf.numPages, fill: (height - margin - lowest) / (height - 2 * margin) };
 }
 
-test.describe("Word export is never longer than the template", () => {
+test.describe("Word export is about as long as the template, never longer", () => {
   test.skip(!soffice, "LibreOffice is not installed");
 
   for (const template of ["classic", "modern-sidebar", "professional-header"]) {
@@ -57,8 +63,11 @@ test.describe("Word export is never longer than the template", () => {
           else firstTwoPage = doc;
         }
         expect(lastOnePage, "sample should fit one page").not.toBeNull();
-        expect(await docxPages(lastOnePage!, `${template}-${lang}-full-page`)).toBe(1);
-        if (firstTwoPage) expect(await docxPages(firstTwoPage, `${template}-${lang}-two-pages`)).toBeLessThanOrEqual(2);
+        const full = await docxLayout(lastOnePage!, `${template}-${lang}-full-page`);
+        expect(full.pages, "a one-page CV must be one page in Word").toBe(1);
+        // …without a big empty gap: a nearly full template page should fill most of the Word page.
+        expect(full.fill, "Word page is much emptier than the template page").toBeGreaterThan(0.78);
+        if (firstTwoPage) expect((await docxLayout(firstTwoPage, `${template}-${lang}-two-pages`)).pages).toBeLessThanOrEqual(2);
       });
     }
   }
