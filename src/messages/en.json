@@ -1,0 +1,151 @@
+{
+  "app": {
+    "name": "CV Builder",
+    "tagline": "Bilingual CV builder",
+    "skipToContent": "Skip to content"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "My documents",
+    "mainNav": "Main navigation"
+  },
+  "settings": {
+    "uiLanguage": "Interface language",
+    "theme": "Appearance",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "create": "Create",
+    "loading": "Loading…",
+    "comingSoon": "Coming in a later phase",
+    "hebrew": "Hebrew",
+    "english": "English",
+    "langBadgeHe": "עב",
+    "langBadgeEn": "EN",
+    "ats": "ATS-friendly",
+    "oneColumn": "1 column",
+    "twoColumns": "2 columns",
+    "photo": "Photo"
+  },
+  "landing": {
+    "title": "CVs that look right in Hebrew and English",
+    "subtitle": "Write your CV once, switch templates instantly, and export a PDF where mixed Hebrew and English text, emails, phone numbers and dates stay in the right order.",
+    "createCv": "Create a CV",
+    "openDashboard": "Open my documents",
+    "localFirst": "Everything stays in your browser. No account needed.",
+    "featuresTitle": "What's inside",
+    "f1Title": "True right-to-left",
+    "f1Body": "Templates mirror correctly, and tokens like C++, GD&T or 05/2025 never get scrambled.",
+    "f2Title": "Live A4 preview",
+    "f2Body": "Edit on one side and see real pages on the other, exactly as they print.",
+    "f3Title": "Built for Israeli CVs",
+    "f3Body": "Military service, Hebrew section titles and Israeli phone formats out of the box.",
+    "f4Title": "Your data, your backup",
+    "f4Body": "Stored locally in your browser, with full JSON backup and restore.",
+    "templatesTitle": "Templates",
+    "templatesSubtitle": "Ten original designs, each tested in Hebrew and English."
+  },
+  "dashboard": {
+    "title": "My documents",
+    "tabCvs": "CVs",
+    "tabLetters": "Cover letters",
+    "tabTracker": "Job tracker",
+    "newCv": "New CV",
+    "import": "Import JSON",
+    "backup": "Back up everything",
+    "filterAll": "All",
+    "filterLabel": "Filter by language",
+    "emptyTitle": "No CVs yet",
+    "emptyBody": "Create your first CV from scratch, from the sample, or import a JSON file.",
+    "emptyLettersTitle": "No cover letters yet",
+    "emptyLettersBody": "Cover letters arrive in phase 6. They will share the theme and header of a linked CV.",
+    "trackerTitle": "Job application tracker",
+    "trackerBody": "A kanban board for saved, applied, interview, offer and rejected applications arrives in phase 6.",
+    "count": "{count, plural, =0 {No documents} one {# document} other {# documents}}",
+    "backupDone": "Backup downloaded",
+    "storageError": "Could not open local storage. Private browsing may block IndexedDB."
+  },
+  "card": {
+    "menu": "Actions for {title}",
+    "open": "Open",
+    "duplicate": "Duplicate",
+    "cloneOther": "Clone to {language}",
+    "rename": "Rename",
+    "download": "Download",
+    "downloadPdf": "PDF",
+    "downloadDocx": "Word (simplified layout)",
+    "downloadJson": "JSON",
+    "delete": "Delete",
+    "edited": "Edited {when}",
+    "duplicated": "Document duplicated",
+    "cloned": "Created a {language} copy",
+    "deleted": "Document deleted",
+    "renamed": "Renamed",
+    "untitled": "Untitled"
+  },
+  "rename": {
+    "title": "Rename document",
+    "label": "Title"
+  },
+  "deleteDialog": {
+    "title": "Delete “<bdi>{title}</bdi>”?",
+    "body": "This removes the document and its version history from this browser. It cannot be undone. Consider downloading a JSON backup first.",
+    "confirm": "Delete"
+  },
+  "create": {
+    "title": "Create a new CV",
+    "stepLanguage": "Language",
+    "stepTemplate": "Template",
+    "stepStart": "Start",
+    "languageQuestion": "Which language is the CV written in?",
+    "languageHint": "This sets the document direction. You can clone it to the other language later.",
+    "heTitle": "Hebrew",
+    "heBody": "Right-to-left, Hebrew section titles",
+    "enTitle": "English",
+    "enBody": "Left-to-right, English section titles",
+    "templateQuestion": "Choose a template",
+    "templateHint": "You can switch at any time without losing content.",
+    "startQuestion": "How do you want to start?",
+    "blank": "Blank",
+    "blankBody": "Empty sections ready to fill",
+    "sample": "From the sample",
+    "sampleBody": "A mechanical engineering student CV to edit",
+    "importJson": "Import JSON",
+    "importBody": "A CV Builder export or a JSON Resume file",
+    "created": "CV created"
+  },
+  "import": {
+    "title": "Import from JSON",
+    "body": "Choose a CV Builder backup, a single exported document, or a JSON Resume file.",
+    "choose": "Choose file",
+    "modeLabel": "When importing a full backup",
+    "merge": "Keep my current documents (add, never overwrite)",
+    "replace": "Replace everything in this browser",
+    "replaceWarning": "Replace deletes all current documents, history and applications first.",
+    "result": "{added, plural, =0 {Nothing new} one {Imported # document} other {Imported # documents}}",
+    "resultCopies": "{count, plural, one {# kept as a copy because it differs from an existing document} other {# kept as copies because they differ from existing documents}}",
+    "resultSkipped": "{count, plural, one {# already up to date} other {# already up to date}}",
+    "failed": "Import failed: {message}"
+  },
+  "editor": {
+    "placeholderTitle": "Editor arrives in phase 2",
+    "placeholderBody": "The split-screen editor with live preview, drag-and-drop and templates is the next phase. For now you can manage documents from the dashboard.",
+    "notFound": "Document not found",
+    "notFoundBody": "It may have been deleted, or it lives in another browser.",
+    "backToDashboard": "Back to my documents"
+  },
+  "thumb": {
+    "label": "Preview of {title}"
+  },
+  "time": {
+    "justNow": "just now"
+  }
+}
