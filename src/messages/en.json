@@ -152,9 +152,7 @@
     "undo": "Undo",
     "redo": "Redo",
     "template": "Template",
-    "templateSoon": "Phase 4",
     "design": "Design",
-    "designSoon": "Design controls arrive in phase 4",
     "download": "Download",
     "downloadPdf": "PDF",
     "downloadDocx": "Word (simplified layout)",
@@ -181,7 +179,16 @@
     "pdfFallback": "Server PDF is not available here, so the print dialog opens instead. Choose “Save as PDF”.",
     "docxHint": "Single-column version. The layout is simpler than the template.",
     "docxReady": "Word file downloaded",
-    "printBlocked": "Allow pop-ups for this site to print."
+    "printBlocked": "Allow pop-ups for this site to print.",
+    "panels": "Editor panels",
+    "panelContent": "Content",
+    "panelDesign": "Design",
+    "lastPageWarning": "Page {n} holds only a few lines.",
+    "fitTo": "{count, plural, one {Fit on one page} other {Fit on # pages}}",
+    "fitting": "Fitting…",
+    "fitDone": "Spacing tightened to fit {count, plural, one {one page} other {# pages}}. Press Ctrl+Z to undo.",
+    "fitFailed": "It does not fit without making the text too small. Try shortening a few items.",
+    "clipWarning": "An item is taller than a whole page and gets cut off. Split it into shorter items."
   },
   "thumb": {
     "label": "Preview of {title}"
@@ -367,5 +374,54 @@
     "movedOver": "{name} moved to position {position} of {total}.",
     "dropped": "{name} dropped at position {position} of {total}.",
     "cancelled": "Moving cancelled. {name} returned to its place."
+  },
+  "design": {
+    "template": "Template",
+    "changeTemplate": "Change",
+    "ats": "ATS-friendly",
+    "color": "Accent color",
+    "customColor": "Pick any color",
+    "hex": "Color code",
+    "typography": "Typography",
+    "fontBody": "Body font",
+    "fontHeading": "Heading font",
+    "fontSize": "Font size",
+    "lineHeight": "Line spacing",
+    "pt": "{value} pt",
+    "mm": "{value} mm",
+    "headingStyle": "Section headings",
+    "headingSample": "Experience",
+    "headingStyles": {
+      "line": "Underlined",
+      "plain": "Plain",
+      "filled": "Shaded",
+      "caps": "Spaced capitals"
+    },
+    "layout": "Layout",
+    "sectionSpacing": "Space between sections",
+    "margins": "Page margins",
+    "pageSize": "Page size",
+    "letter": "US Letter",
+    "details": "Details",
+    "showPhoto": "Show photo",
+    "photoUnsupported": "This template has no place for a photo.",
+    "noPhoto": "Add a photo under Personal details.",
+    "showIcons": "Icons next to contact details",
+    "dateFormat": "Date format",
+    "presentLabel": "Word for an ongoing period",
+    "reset": "Reset to the template's design",
+    "resetDone": "Design reset to the template defaults"
+  },
+  "templates": {
+    "title": "Templates",
+    "subtitle": "Your CV in each template. Pick one to switch; your content stays the same.",
+    "filter": "Filter templates",
+    "filters": {
+      "all": "All",
+      "ats": "ATS-friendly",
+      "one": "1 column",
+      "two": "2 columns",
+      "photo": "With photo"
+    }
   }
 }

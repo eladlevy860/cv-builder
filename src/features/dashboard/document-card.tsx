@@ -36,6 +36,7 @@ import { relativeTime } from "@/lib/relative-time";
 import { useExport } from "@/features/export/use-export";
 import { docActions } from "./actions";
 import { DeleteDialog } from "./delete-dialog";
+import { CvThumbnail } from "@/features/thumbnail/cv-thumbnail";
 import { DocThumbnail } from "./doc-thumbnail";
 import { RenameDialog } from "./rename-dialog";
 
@@ -68,7 +69,11 @@ export function DocumentCard({ doc }: { doc: AnyDocument }) {
       data-doc-id={doc.id}
     >
       <Link href={href} className="block bg-muted/60 p-4 outline-none" tabIndex={-1} aria-hidden>
-        <DocThumbnail doc={doc} className="rounded-sm shadow-paper" />
+        {doc.type === "cv" ? (
+          <CvThumbnail doc={doc} className="rounded-sm shadow-paper" />
+        ) : (
+          <DocThumbnail doc={doc} className="rounded-sm shadow-paper" />
+        )}
       </Link>
       <div className="flex items-start gap-2 border-t p-3">
         <div className="min-w-0 flex-1">

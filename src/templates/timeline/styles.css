@@ -1,0 +1,80 @@
+/*
+ * Timeline: experience, education and service hang off a vertical line at
+ * the inline start (right in Hebrew), each with a dot and the date above
+ * the title. Section headings sit on the same axis.
+ */
+.tpl-timeline {
+  --tl-axis: calc(var(--cv-fs) * 0.55);
+  --tl-line: color-mix(in srgb, var(--cv-accent) 28%, white);
+}
+.tpl-timeline .tl-frame {
+  padding: var(--cv-margin);
+}
+.tpl-timeline .tl-header {
+  margin-block-end: var(--cv-gap);
+}
+.tpl-timeline .tl-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5em;
+}
+.tpl-timeline .tl-header-text {
+  flex: 1;
+  min-width: 0;
+}
+.tpl-timeline .cv-name {
+  color: var(--cv-accent);
+}
+.tpl-timeline .cv-contacts {
+  margin-block-start: 0.6em;
+}
+.tpl-timeline .cv-photo {
+  width: 27mm;
+  height: 27mm;
+}
+
+.tpl-timeline .cv-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+}
+.tpl-timeline .cv-heading::before {
+  content: "";
+  flex: none;
+  width: calc(var(--tl-axis) * 2);
+  height: calc(var(--tl-axis) * 2);
+  border-radius: 50%;
+  border: 2px solid var(--cv-accent);
+  background: #ffffff;
+}
+.tpl-timeline.cv-hs-line .cv-heading,
+.tpl-timeline.cv-hs-filled .cv-heading {
+  padding-inline-start: 0;
+}
+
+/* Everything that is not on the timeline lines up with the timeline text. */
+.tpl-timeline .cv-block > :not(.cv-heading) {
+  margin-inline-start: calc(var(--tl-axis) * 2 + 0.55 * 1.22 * var(--cv-fs));
+}
+.tpl-timeline :is(.cv-item--experience, .cv-item--education, .cv-item--military, .cv-item--volunteering) {
+  position: relative;
+  margin-inline-start: calc(var(--tl-axis) - 1px) !important;
+  padding-inline-start: calc(var(--tl-axis) + 0.55 * 1.22 * var(--cv-fs) + 1px);
+  border-inline-start: 2px solid var(--tl-line);
+  /* Padding instead of margin keeps the line continuous between items. */
+  margin-block-start: 0 !important;
+  padding-block: calc(var(--cv-gap) * 0.3) 0;
+}
+.tpl-timeline :is(.cv-item--experience, .cv-item--education, .cv-item--military, .cv-item--volunteering)::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: calc(var(--tl-axis) * -0.5 - 1px);
+  top: calc(var(--cv-gap) * 0.3 + 0.5lh - var(--tl-axis) * 0.5);
+  width: var(--tl-axis);
+  height: var(--tl-axis);
+  border-radius: 50%;
+  background: var(--cv-accent);
+}
+.tpl-timeline .cv-entry--date-above .cv-entry-subline {
+  color: #4b5563;
+}

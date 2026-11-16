@@ -14,6 +14,13 @@ export type TemplateMeta = {
   defaultAccent: string;
   /** Curated accent presets. */
   accentPresets: string[];
+  /**
+   * Word export spacing factor (line spacing and gaps), when the column
+   * count alone does not predict it: layouts that keep headings beside the
+   * content or put a lot into a side column need a tighter Word file to
+   * stay within the same number of pages.
+   */
+  wordDensity?: number;
 };
 
 const PRESETS_COOL = ["#1f4e79", "#2b6cb0", "#0f766e", "#334155", "#4c1d95", "#7c2d12", "#166534", "#9f1239"];
@@ -52,6 +59,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["minimal"],
     defaultAccent: "#334155",
     accentPresets: PRESETS_COOL,
+    wordDensity: 0.85,
   },
   {
     id: "professional-header",
@@ -74,6 +82,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["student", "one-page"],
     defaultAccent: "#2b6cb0",
     accentPresets: PRESETS_COOL,
+    wordDensity: 0.8,
   },
   {
     id: "timeline",
@@ -96,6 +105,7 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ["technical"],
     defaultAccent: "#0e7490",
     accentPresets: PRESETS_COOL,
+    wordDensity: 0.76,
   },
   {
     id: "elegant",

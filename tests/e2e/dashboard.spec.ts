@@ -72,7 +72,7 @@ test.describe("dashboard", () => {
     // The Hebrew sample card renders its thumbnail right-to-left.
     const heCard = page.getByTestId("doc-card").filter({ hasText: "קורות חיים – דוגמה" });
     await expect(heCard.getByTestId("lang-badge")).toHaveText("עב");
-    await expect(heCard.locator('[dir="rtl"]').first()).toBeVisible();
+    await expect(heCard.locator('.cv-pages .cv-page[dir="rtl"]')).toBeVisible();
 
     // Rename
     await openMenu(page, heCard);

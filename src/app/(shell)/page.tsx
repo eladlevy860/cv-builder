@@ -3,7 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowRightIcon, FileCheck2Icon, LanguagesIcon, MedalIcon, ShieldCheckIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DocThumbnail } from "@/features/dashboard/doc-thumbnail";
+import { SampleThumbnail } from "@/features/thumbnail/sample-thumbnail";
 import { TEMPLATES } from "@/templates/meta";
 
 export default async function LandingPage() {
@@ -37,8 +37,8 @@ export default async function LandingPage() {
           <p className="text-sm text-muted-foreground">{t("landing.localFirst")}</p>
         </div>
         <div className="relative mx-auto grid w-full max-w-md grid-cols-2 gap-4" aria-hidden>
-          <DocThumbnail templateId="modern-sidebar" language="he" className="translate-y-6 rounded-md shadow-paper" />
-          <DocThumbnail templateId="professional-header" language="en" className="rounded-md shadow-paper" />
+          <SampleThumbnail templateId="modern-sidebar" language="he" className="translate-y-6 rounded-md shadow-paper" />
+          <SampleThumbnail templateId="professional-header" language="en" className="rounded-md shadow-paper" />
         </div>
       </section>
 
@@ -65,7 +65,7 @@ export default async function LandingPage() {
         <ul className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
           {TEMPLATES.map((tpl, i) => (
             <li key={tpl.id} className="flex flex-col gap-2">
-              <DocThumbnail
+              <SampleThumbnail
                 templateId={tpl.id}
                 language={i % 2 === 0 ? ui : ui === "he" ? "en" : "he"}
                 className="rounded-md border shadow-paper"

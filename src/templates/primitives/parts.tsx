@@ -71,17 +71,25 @@ export function EntryView({
   entry,
   subtitleInline = true,
   showLocation = true,
+  datePlacement = "end",
 }: {
   ctx: RenderContext;
   entry: Entry;
   /** Render "Title, Subtitle" on one line (true) or the subtitle on its own line. */
   subtitleInline?: boolean;
   showLocation?: boolean;
+  /** "end": on the title line, at the inline end. "above": its own line above the title (timelines). */
+  datePlacement?: "end" | "above";
 }) {
   const sep = ctx.lang === "he" ? ", " : ", ";
   const subLine = !subtitleInline && (entry.subtitle || (showLocation && entry.location));
   return (
-    <div className="cv-entry">
+    <div className={`cv-entry cv-entry--date-${datePlacement}`}>
+      {datePlacement === "above" && entry.date && (
+        <div className="cv-entry-when">
+          <DateText ctx={ctx} date={entry.date} numeric={entry.numericDate} />
+        </div>
+      )}
       <div className="cv-entry-head">
         <div className="cv-entry-what">
           <Field text={entry.title} ctx={ctx} className="cv-entry-title" />
@@ -98,7 +106,7 @@ export function EntryView({
             </>
           )}
         </div>
-        <DateText ctx={ctx} date={entry.date} numeric={entry.numericDate} />
+        {datePlacement === "end" && <DateText ctx={ctx} date={entry.date} numeric={entry.numericDate} />}
       </div>
       {subLine && (
         <div className="cv-entry-subline">

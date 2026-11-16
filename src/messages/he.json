@@ -152,9 +152,7 @@
     "undo": "ביטול פעולה",
     "redo": "ביצוע חוזר",
     "template": "תבנית",
-    "templateSoon": "שלב 4",
     "design": "עיצוב",
-    "designSoon": "כלי העיצוב יגיעו בשלב 4",
     "download": "הורדה",
     "downloadPdf": "PDF",
     "downloadDocx": "Word (פריסה פשוטה)",
@@ -181,7 +179,16 @@
     "pdfFallback": "יצירת PDF בשרת אינה זמינה כאן, לכן נפתח חלון ההדפסה. בחרו „שמירה כ-PDF”.",
     "docxHint": "גרסה בעמודה אחת. הפריסה פשוטה יותר מהתבנית.",
     "docxReady": "קובץ ה-Word הורד",
-    "printBlocked": "אפשרו חלונות קופצים לאתר זה כדי להדפיס."
+    "printBlocked": "אפשרו חלונות קופצים לאתר זה כדי להדפיס.",
+    "panels": "חלוניות העורך",
+    "panelContent": "תוכן",
+    "panelDesign": "עיצוב",
+    "lastPageWarning": "בעמוד {n} יש רק כמה שורות.",
+    "fitTo": "{count, plural, one {כיווץ לעמוד אחד} other {כיווץ ל־# עמודים}}",
+    "fitting": "מכווץ…",
+    "fitDone": "הריווח צומצם כדי להתאים ל{count, plural, one {עמוד אחד} other {־# עמודים}}. לביטול: Ctrl+Z.",
+    "fitFailed": "אי אפשר להתאים בלי להקטין את הטקסט יותר מדי. כדאי לקצר כמה פריטים.",
+    "clipWarning": "פריט אחד ארוך מעמוד שלם ונחתך. כדאי לפצל אותו לפריטים קצרים יותר."
   },
   "thumb": {
     "label": "תצוגה מקדימה של {title}"
@@ -367,5 +374,54 @@
     "movedOver": "{name} הועבר למקום {position} מתוך {total}.",
     "dropped": "{name} שוחרר במקום {position} מתוך {total}.",
     "cancelled": "ההזזה בוטלה. {name} חזר למקומו."
+  },
+  "design": {
+    "template": "תבנית",
+    "changeTemplate": "החלפה",
+    "ats": "ידידותי ל-ATS",
+    "color": "צבע הדגשה",
+    "customColor": "בחירת צבע חופשית",
+    "hex": "קוד צבע",
+    "typography": "טיפוגרפיה",
+    "fontBody": "גופן טקסט",
+    "fontHeading": "גופן כותרות",
+    "fontSize": "גודל גופן",
+    "lineHeight": "מרווח שורות",
+    "pt": "{value} נק׳",
+    "mm": "{value} מ״מ",
+    "headingStyle": "כותרות מקטעים",
+    "headingSample": "ניסיון",
+    "headingStyles": {
+      "line": "קו תחתון",
+      "plain": "פשוט",
+      "filled": "רקע צבעוני",
+      "caps": "מרווח אותיות"
+    },
+    "layout": "פריסה",
+    "sectionSpacing": "ריווח בין מקטעים",
+    "margins": "שולי הדף",
+    "pageSize": "גודל דף",
+    "letter": "Letter (ארה״ב)",
+    "details": "פרטים",
+    "showPhoto": "הצגת תמונה",
+    "photoUnsupported": "בתבנית הזו אין מקום לתמונה.",
+    "noPhoto": "אפשר להוסיף תמונה בפרטים האישיים.",
+    "showIcons": "אייקונים ליד פרטי הקשר",
+    "dateFormat": "תבנית תאריך",
+    "presentLabel": "המילה לתקופה שעדיין נמשכת",
+    "reset": "איפוס לעיצוב של התבנית",
+    "resetDone": "העיצוב אופס לברירות המחדל של התבנית"
+  },
+  "templates": {
+    "title": "תבניות",
+    "subtitle": "קורות החיים שלך בכל תבנית. בחירה מחליפה את התבנית, והתוכן נשאר כפי שהוא.",
+    "filter": "סינון תבניות",
+    "filters": {
+      "all": "הכול",
+      "ats": "ידידותי ל-ATS",
+      "one": "עמודה אחת",
+      "two": "שתי עמודות",
+      "photo": "עם תמונה"
+    }
   }
 }

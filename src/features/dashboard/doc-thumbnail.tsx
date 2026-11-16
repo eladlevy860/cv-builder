@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  * Lightweight schematic thumbnail of a document (or of a template when no
  * document is given). Uses container-query units so it scales with the card.
  * The document's own direction and language are applied, so Hebrew CVs show
- * mirrored layouts. Real template rendering replaces this in phase 4.
+ * mirrored layouts. Used for cover letters; CVs use the real renderer (CvThumbnail).
  */
 export function DocThumbnail({
   doc,

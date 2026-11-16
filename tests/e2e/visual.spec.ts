@@ -1,12 +1,13 @@
 import { expect, test } from "@playwright/test";
+import { TEMPLATES as ALL } from "@/templates/meta";
 
 /**
- * Visual snapshots of every implemented template × {he, en} with the sample
+ * Visual snapshots of every template × {he, en} with the sample
  * data. Baselines live in tests/e2e/visual.spec.ts-snapshots/. Regenerate
  * after intentional design changes with:
  *   npx playwright test visual --update-snapshots
  */
-const TEMPLATES = ["classic", "modern-sidebar", "professional-header"];
+const TEMPLATES = ALL.map((t) => t.id);
 
 for (const template of TEMPLATES) {
   for (const lang of ["he", "en"] as const) {

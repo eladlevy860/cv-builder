@@ -65,7 +65,8 @@ const ptToTwip = (pt: number) => Math.round(pt * 20);
  * extra lines in Word's single column.
  */
 export function wordDensity(doc: CvDocument): number {
-  return getTemplateMeta(doc.templateId).columns === 2 ? DENSITY_TWO_COLUMNS : DENSITY_ONE_COLUMN;
+  const meta = getTemplateMeta(doc.templateId);
+  return meta.wordDensity ?? (meta.columns === 2 ? DENSITY_TWO_COLUMNS : DENSITY_ONE_COLUMN);
 }
 export const DENSITY_ONE_COLUMN = 1.0;
 export const DENSITY_TWO_COLUMNS = 0.9;

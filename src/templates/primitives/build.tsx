@@ -10,6 +10,10 @@ export type SectionRenderOptions = {
   skills?: "inline" | "list" | "chips";
   /** Subtitle (organization) on the title line or on its own line. */
   subtitleInline?: boolean;
+  /** Where entry dates go (see EntryView). */
+  datePlacement?: "end" | "above";
+  /** Groups items into rows of N (one block per row) laid out as a grid. */
+  perRow?: number;
   /** Custom item renderer (return undefined to fall back to the default). */
   renderItem?: (section: Section, item: SectionItem, ctx: RenderContext) => ReactNode | undefined;
 };
@@ -24,7 +28,14 @@ export function renderItem(ctx: RenderContext, section: Section, item: SectionIt
     case "languages":
       return <LanguageView ctx={ctx} section={section} item={item as never} />;
     default:
-      return <EntryView ctx={ctx} entry={toEntry(section, item, ctx.lang, ctx.theme)} subtitleInline={opts.subtitleInline ?? true} />;
+      return (
+        <EntryView
+          ctx={ctx}
+          entry={toEntry(section, item, ctx.lang, ctx.theme)}
+          subtitleInline={opts.subtitleInline ?? true}
+          datePlacement={opts.datePlacement}
+        />
+      );
   }
 }
 
@@ -64,6 +75,26 @@ export function sectionBlocks(ctx: RenderContext, section: Section, opts: Sectio
     });
     return blocks;
   }
+  const perRow = opts.perRow ?? 1;
+  if (perRow > 1) {
+    for (let i = 0; i < items.length; i += perRow) {
+      const row = items.slice(i, i + perRow);
+      blocks.push({
+        key: `${section.id}:row:${row[0].id}`,
+        sectionId: section.id,
+        node: (
+          <div className="cv-item-row" style={{ gridTemplateColumns: `repeat(${perRow}, minmax(0, 1fr))` }}>
+            {row.map((it) => (
+              <div key={it.id} className={`cv-item cv-item--${section.type}`} data-item-id={it.id}>
+                {renderItem(ctx, section, it, opts)}
+              </div>
+            ))}
+          </div>
+        ),
+      });
+    }
+    return blocks;
+  }
   for (const it of items) {
     blocks.push({
       key: `${section.id}:${it.id}`,
@@ -94,4 +125,31 @@ export function splitSections(ctx: RenderContext, sideTypes: SectionType[] | und
     (toSide ? side : main).push(s);
   }
   return { main, side };
+}
+
+/** Per-section options: a function of the section, or the same options for all. */
+export type SectionOptionsFor = SectionRenderOptions | ((section: Section) => SectionRenderOptions);
+
+export function blocksFor(ctx: RenderContext, sections: Section[], opts: SectionOptionsFor = {}): Block[] {
+  return sections.flatMap((s) => sectionBlocks(ctx, s, typeof opts === "function" ? opts(s) : opts));
+}
+
+/**
+ * Merges each section heading with the section's first block, so the two
+ * become one unbreakable row (used for label-column layouts). The merged
+ * block keeps the first block's item id, so clicks still jump to the item.
+ */
+export function attachHeadings(blocks: Block[], render: (heading: ReactNode, first: ReactNode) => ReactNode): Block[] {
+  const out: Block[] = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i];
+    const next = blocks[i + 1];
+    if (b.keepWithNext && next && next.sectionId === b.sectionId) {
+      out.push({ ...next, key: `${b.key}+${next.key}`, node: render(b.node, next.node) });
+      i++;
+    } else {
+      out.push(b);
+    }
+  }
+  return out;
 }

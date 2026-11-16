@@ -8,6 +8,8 @@ import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getStorage } from "@/core/storage";
 import { cn } from "@/lib/utils";
+import { DesignPanel } from "./design/design-panel";
+import { TemplateDrawer } from "./design/template-drawer";
 import { FormPanel } from "./form/form-panel";
 import { PreviewPanel } from "./preview/preview-panel";
 import { editorActions, useEditorStore } from "./store";
@@ -91,10 +93,21 @@ function Editor() {
   const flush = useAutosave();
   useShortcuts(flush);
   const [tab, setTab] = useState<"edit" | "preview">("edit");
+  const [panel, setPanel] = useState<"content" | "design">("content");
+  const [templatesOpen, setTemplatesOpen] = useState(false);
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col" data-testid="editor">
-      <EditorTopbar flush={flush} />
+      <EditorTopbar
+        flush={flush}
+        designOpen={panel === "design"}
+        onDesign={() => {
+          setPanel((p) => (p === "design" ? "content" : "design"));
+          setTab("edit");
+        }}
+        onTemplates={() => setTemplatesOpen(true)}
+      />
+      <TemplateDrawer open={templatesOpen} onOpenChange={setTemplatesOpen} />
       <div role="tablist" aria-label={t("tabEdit")} className="flex border-b lg:hidden">
         {(["edit", "preview"] as const).map((k) => (
           <button
@@ -117,7 +130,28 @@ function Editor() {
           className={cn("min-h-0 overflow-y-auto border-e bg-background", tab !== "edit" && "hidden lg:block")}
           data-testid="form-panel"
         >
-          <FormPanel />
+          <div role="tablist" aria-label={t("panels")} className="sticky top-0 z-10 flex gap-1 border-b bg-background/95 px-4 pt-2 backdrop-blur">
+            {(["content", "design"] as const).map((k) => (
+              <button
+                key={k}
+                role="tab"
+                id={`panel-tab-${k}`}
+                aria-selected={panel === k}
+                aria-controls={`panel-${k}`}
+                onClick={() => setPanel(k)}
+                className={cn(
+                  "-mb-px border-b-2 border-transparent px-3 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+                  panel === k && "border-primary text-foreground",
+                )}
+                data-testid={`panel-tab-${k}`}
+              >
+                {k === "content" ? t("panelContent") : t("panelDesign")}
+              </button>
+            ))}
+          </div>
+          <div role="tabpanel" id={`panel-${panel}`} aria-labelledby={`panel-tab-${panel}`}>
+            {panel === "content" ? <FormPanel /> : <DesignPanel onChangeTemplate={() => setTemplatesOpen(true)} />}
+          </div>
         </section>
         <section aria-label={t("previewRegion")} className={cn("min-h-0 min-w-0", tab !== "preview" && "hidden lg:block")}>
           <PreviewPanel onJump={() => setTab("edit")} />

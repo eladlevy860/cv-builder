@@ -2,10 +2,11 @@
 
 A local-first web app for writing CVs and cover letters in **Hebrew (RTL)** and **English (LTR)**. Right-to-left support is built in from the start, not added afterwards. All data stays in your browser (IndexedDB). You can back everything up to JSON and restore it.
 
-> **Status: Phase 3 (Export) done.**
+> **Status: Phase 4 (Templates and design) done.**
 > - **Phase 1:** the app shell in Hebrew and English with RTL mirroring, data model and migrations, Dexie storage, the dashboard, and JSON backup/import.
 > - **Phase 2:** the split-screen editor, every section type including Military Service, drag-and-drop, autosave, undo/redo, version history, a paginated live preview, and three templates.
 > - **Phase 3:** PDF via headless Chromium, a "Print / Save as PDF" fallback, Word export with right-to-left Hebrew paragraphs, and the bidi test strings checked in the preview, the PDF and the DOCX.
+> - **Phase 4:** all ten templates, a design panel, a template drawer showing your own CV in every template, real thumbnails on the dashboard, and page-length warnings with "fit on fewer pages".
 
 ## Requirements
 
@@ -122,15 +123,18 @@ src/
     render/entries.ts       format-independent view of items (shared by templates, DOCX, ATS text)
   templates/
     meta.ts                 metadata for all 10 templates
-    registry.ts             implemented template components
+    registry.ts             the ten template definitions
     types.ts                TemplateDefinition, Block, RenderContext
-    primitives/             text.tsx (all bidi handling), parts.tsx, build.tsx
+    primitives/             text.tsx (all bidi handling), parts.tsx, build.tsx, two-column.tsx
     paginator.tsx           measures blocks and packs them into real pages
+    apply.ts                switching templates, template theme defaults, design reset
+    fit.ts                  candidate settings for "fit on fewer pages"
     base.css, <id>/         shared and per-template styles
   server/pdf.ts             headless Chromium PDF rendering (used by app/api/pdf)
   features/export/          client export actions (PDF, DOCX, print)
   features/dashboard/       dashboard UI (cards, create flow, dialogs)
-  features/editor/          store (history), autosave, form panels, preview, topbar
+  features/editor/          store (history), autosave, form panels, design panel, template drawer, preview, topbar
+  features/thumbnail/       real first-page thumbnails (dashboard, drawer, create dialog, landing)
   components/ui/            shadcn/ui components
   components/shell/         header, locale switcher, theme toggle, providers
   i18n/                     next-intl config (cookie-based locale)
@@ -187,12 +191,15 @@ The UI only talks to `StorageAdapter` (`src/core/storage/adapter.ts`). `DexieSto
 - **Autosave:** `use-autosave.ts` writes to storage 0.7s after the last change and when you leave the page. It also takes an automatic version snapshot at most every 10 minutes and keeps the latest 20. **Ctrl+S** saves immediately and records a version. The history dialog lets you save named versions and restore any version; a restore can itself be undone with Ctrl+Z.
 - **Drag and drop:** `@dnd-kit` handles vertical lists, works with the keyboard (Space to pick up, arrows to move, Space to drop) and gives screen-reader announcements in Hebrew and English. Each section and item menu also has "Move up/down".
 - **Preview:** the preview renders a deferred copy of the document, so typing stays responsive. Clicking anything in the preview opens and scrolls to that section or item in the form. Zoom is applied per page so pagination is always measured at 100%.
+- **Design panel** (`design/design-panel.tsx`, the "Design" tab or button): accent color (template presets, a color picker or a hex code), body and heading fonts, font size, line spacing, section heading style, space between sections, page margins, A4 or Letter, photo and contact icons on or off, date format, and "היום"/"כיום" for ongoing periods. Every change is one undo step. "Reset to the template's design" restores the template's defaults and keeps your content and photo setting.
+- **Template drawer** (`design/template-drawer.tsx`): every thumbnail is your own CV rendered in that template by the same renderer as the preview, with filters (ATS-friendly, 1 or 2 columns, photo). Picking a template applies it at once, and Ctrl+Z switches back. In Hebrew the drawer opens from the right, over the form, so the full preview stays visible.
+- **Page-length warnings:** the paginator reports how full the last page is and whether anything is cut off. When the last page holds only a few lines, the preview offers "Fit on N pages". It tries progressively tighter settings off-screen with the real renderer (space between sections first, then line spacing and margins, font size last, never below 9pt) and applies the first that fits, as a single undoable step. An item taller than a whole page is reported as cut off, and more than two pages gets a gentle warning.
 
 ## Templates and pagination
 
 A template is a `TemplateDefinition` (`src/templates/types.ts`):
 
-- `build(ctx)` returns `{ header, main: Block[], side: Block[] }`. A *block* is an unbreakable unit: a section heading (`keepWithNext`), one item, a summary, or the group of languages.
+- `build(ctx)` returns `{ header, main: Block[], side: Block[] }`. A *block* is an unbreakable unit: a section heading (`keepWithNext`), one item, a summary, the group of languages, or a row of items (`perRow`, used for Student's two-column course list). `attachHeadings()` merges a heading into its first item's block for label-column layouts (Minimal).
 - `Frame` renders one page's structure and puts `main` and `side` into elements marked `data-region="main" | "side"`, which fill the remaining page height.
 - The paginator (`src/templates/paginator.tsx`) works in four steps:
   1. It renders hidden measuring copies: the first-page frame and a following-page frame (to read each region's capacity), and every block at the real width (to read its height).
@@ -212,9 +219,9 @@ A template is a `TemplateDefinition` (`src/templates/types.ts`):
 1. Add metadata in `src/templates/meta.ts`.
 2. Create `src/templates/<id>/index.tsx` exporting a `TemplateDefinition`:
    - Build blocks with `splitSections()` and `sectionBlocks()` from `primitives/build.tsx`, and the header with `NameBlock`, `Contacts` and `Photo` from `primitives/parts.tsx`.
-   - Optionally set `themeDefaults` (applied on switch only where the user hasn't changed the value) and `sideTypes` for two-column layouts.
+   - Optionally set `themeDefaults` (applied on switch only where the user hasn't changed the value), `sideTypes` for two-column layouts (use `TwoColumnFrame` from `primitives/two-column.tsx`), and `promoteTypes` to move sections up when the template is applied (Student moves education up).
 3. Create `src/templates/<id>/styles.css`. Scope every rule with `.tpl-<id>`, use **logical properties only** (no left/right), and take sizes and colors from the theme variables (`--cv-accent`, `--cv-on-accent`, `--cv-font-body`, `--cv-font-heading`, `--cv-fs`, `--cv-lh`, `--cv-gap`, `--cv-margin`). Import the file in `src/templates/styles.css`.
-4. Register the template in `src/templates/registry.ts` and add its id to `tests/e2e/visual.spec.ts`.
+4. Register the template in `src/templates/registry.ts`. The visual, PDF and Word-length tests pick up every template in `meta.ts` automatically.
 5. Run `npx playwright test visual --update-snapshots`, then check the new PNGs in both languages.
 
 ## Export
@@ -247,7 +254,7 @@ Generated in the browser with the `docx` package (`src/core/export/docx.ts`), an
 - **Content:** a single-column version of the CV with the same sections, order and content as the template. Hidden sections and items are left out, the same as in the preview.
 - **Direction:** Hebrew documents use bidirectional paragraphs and sections. Every run has an explicit direction (`w:rtl`), and runs in the opposite direction are wrapped in invisible LRM/RLM marks. Word and LibreOffice don't isolate runs the way browsers do, and without the marks `10/2023 – 02/2025` would come out as `02/2025 – 10/2023`.
 - **Fonts:** Word can't use the web fonts, so sans-serif themes map to Arial and serif themes to Times New Roman. Both include Hebrew on Windows and macOS.
-- **Length:** Word's line spacing is converted from the template's CSS line-height, so the Word file comes out about as long as the PDF. One-column templates fill about 90% of the page where the PDF fills 97–100%, which leaves headroom because Word lays out text slightly differently from Chromium. Two-column templates are packed tighter (`DENSITY_TWO_COLUMNS` in `docx.ts`) because their sidebar becomes extra lines in Word's single column. `tests/e2e/docx-fit.spec.ts` fills each template to a full page in both languages and checks the Word file is one page and not much emptier. It uses LibreOffice and is skipped if LibreOffice isn't installed.
+- **Length:** Word's line spacing is converted from the template's CSS line-height, so the Word file comes out about as long as the PDF. One-column templates fill about 90% of the page where the PDF fills 97–100%, which leaves headroom because Word lays out text slightly differently from Chromium. Two-column templates are packed tighter (`DENSITY_TWO_COLUMNS` in `docx.ts`) because their sidebar becomes extra lines in Word's single column. Templates whose layout differs more from a single column set their own factor (`wordDensity` in `meta.ts`): Minimal keeps headings beside the content, and Compact and Engineer put a lot into the side column. `tests/e2e/docx-fit.spec.ts` fills each template to a full page in both languages and checks the Word file is one page and not much emptier. It uses LibreOffice and is skipped if LibreOffice isn't installed.
 
 ### Bidi verification
 

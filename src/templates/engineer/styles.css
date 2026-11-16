@@ -1,0 +1,96 @@
+/*
+ * Engineer: header with contacts in a two-column grid, a tinted side panel
+ * with skills as chips, and projects as highlighted cards.
+ */
+.tpl-engineer {
+  --cv-side-w: 34%;
+  --en-panel: color-mix(in srgb, var(--cv-accent) 6%, #f8fafc);
+}
+.tpl-engineer .en-frame {
+  padding-block-start: var(--cv-margin);
+}
+.tpl-engineer .en-frame--rest {
+  padding-block-start: 0;
+}
+.tpl-engineer .en-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.2em;
+  padding-inline: var(--cv-margin);
+  padding-block-end: 0.9em;
+  border-block-end: 3px solid var(--cv-accent);
+}
+.tpl-engineer .en-id {
+  min-width: 0;
+}
+.tpl-engineer .cv-name {
+  font-size: 2.3em;
+  color: #0f172a;
+}
+.tpl-engineer .cv-headline {
+  color: var(--cv-accent);
+  font-weight: 500;
+}
+.tpl-engineer .en-header .cv-contacts {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.25em 1.1em;
+  font-size: 0.9em;
+  flex: none;
+  max-width: 55%;
+}
+.tpl-engineer .en-main {
+  padding: var(--cv-gap) var(--cv-margin) var(--cv-margin);
+}
+.tpl-engineer .en-frame--rest .en-main,
+.tpl-engineer .en-frame--rest .en-side {
+  padding-block-start: var(--cv-margin);
+}
+.tpl-engineer .en-side {
+  background: var(--en-panel);
+  padding: var(--cv-gap) calc(var(--cv-margin) * 0.75) var(--cv-margin);
+}
+.tpl-engineer .cv-heading-text::before {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-inline-end: 0.45em;
+  vertical-align: 0.1em;
+  background: var(--cv-accent);
+}
+.tpl-engineer .en-side .cv-heading {
+  font-size: 0.98em;
+}
+.tpl-engineer .en-side .cv-skills + .cv-skills,
+.tpl-engineer .en-side .cv-item + .cv-item,
+.tpl-engineer .en-side .cv-block:has(> .cv-item) + .cv-block > .cv-item {
+  margin-block-start: 0.6em;
+}
+.tpl-engineer .cv-skills--chips .cv-skill {
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--cv-accent) 30%, white);
+  border-radius: 0.25em;
+  font-size: 0.88em;
+}
+.tpl-engineer .cv-skills--chips .cv-skills-name {
+  font-size: 0.9em;
+  color: #334155;
+}
+.tpl-engineer .en-side .cv-langs {
+  flex-direction: column;
+  gap: 0.2em;
+}
+.tpl-engineer .en-side .cv-entry-head {
+  flex-wrap: wrap;
+  column-gap: 0.5em;
+}
+.tpl-engineer .cv-item--projects {
+  padding: 0.4em 0.75em;
+  border-inline-start: 3px solid var(--cv-accent);
+  background: var(--en-panel);
+}
+.tpl-engineer .cv-item--projects .cv-entry-title {
+  color: var(--cv-accent);
+}

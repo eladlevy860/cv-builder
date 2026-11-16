@@ -70,7 +70,9 @@ test.describe("editor", () => {
     await openSample(page, "he");
     const text = await preview(page).locator(".cv-region").first().innerText();
     await page.getByTestId("template-menu").click();
-    await page.getByTestId("template-option-modern-sidebar").click();
+    await page.getByTestId("template-card-modern-sidebar").click();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     const pageEl = preview(page).locator(".cv-page").first();
     await expect(pageEl).toHaveClass(/tpl-modern-sidebar/);
     const side = await pageEl.locator(".ms-side").boundingBox();
@@ -78,9 +80,10 @@ test.describe("editor", () => {
     expect(side!.x).toBeGreaterThan(main!.x); // sidebar on the right in Hebrew
     await expect(pageEl).toContainText("מהנדס מכונות (סטודנט)");
 
-    await expect(page.getByRole("menu")).toHaveCount(0);
     await page.getByTestId("template-menu").click();
-    await page.getByTestId("template-option-classic").click();
+    await page.getByTestId("template-card-classic").click();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(preview(page).locator(".cv-page").first()).toHaveClass(/tpl-classic/);
     expect(await preview(page).locator(".cv-region").first().innerText()).toBe(text);
   });

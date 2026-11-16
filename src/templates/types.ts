@@ -48,6 +48,8 @@ export type TemplateDefinition = {
   themeDefaults?: Partial<Theme>;
   /** Section types placed in the side column when placement is "auto". */
   sideTypes?: SectionType[];
+  /** Section types moved up (right after the summary) when the template is applied. */
+  promoteTypes?: SectionType[];
   build(ctx: RenderContext): TemplateLayout;
   /**
    * Page structure. Must render `main` inside an element with

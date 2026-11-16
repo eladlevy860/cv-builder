@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { produce } from "immer";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ArrowLeftIcon, ArrowRightIcon, FileIcon, SparklesIcon, UploadIcon } from "lucide-react";
@@ -14,7 +15,7 @@ import { getStorage } from "@/core/storage";
 import { applyTemplate } from "@/templates/apply";
 import { TEMPLATES } from "@/templates/meta";
 import { cn } from "@/lib/utils";
-import { DocThumbnail } from "./doc-thumbnail";
+import { CvThumbnail } from "@/features/thumbnail/cv-thumbnail";
 import { importFile, summarizeImport } from "./import-dialog";
 
 type Step = 0 | 1 | 2;
@@ -37,6 +38,12 @@ export function CreateCvDialog({
   const [templateId, setTemplateId] = useState(TEMPLATES[0].id);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Template thumbnails show the sample CV in the chosen language.
+  const sample = useMemo(() => createSampleCv(language), [language]);
+  const previews = useMemo(
+    () => Object.fromEntries(TEMPLATES.map((m) => [m.id, produce(sample, (d) => applyTemplate(d, m.id, true))])),
+    [sample],
+  );
 
   function reset(nextOpen: boolean) {
     if (!nextOpen) {
@@ -168,7 +175,7 @@ export function CreateCvDialog({
                     templateId === tpl.id && "border-primary bg-accent ring-1 ring-primary",
                   )}
                 >
-                  <DocThumbnail templateId={tpl.id} language={language} className="rounded-sm border" />
+                  <CvThumbnail doc={previews[tpl.id]} label={tpl.name[ui]} className="rounded-sm border" />
                   <span className="text-sm font-medium">{tpl.name[ui]}</span>
                   <span className="flex flex-wrap gap-1">
                     {tpl.atsFriendly && <Badge variant="muted">{t("common.ats")}</Badge>}

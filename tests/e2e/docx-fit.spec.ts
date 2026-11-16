@@ -7,6 +7,7 @@ import { reId } from "@/core/model/factory";
 import type { CvDocument } from "@/core/model/schema";
 import { createSampleCv } from "@/core/samples";
 import { applyTemplate } from "@/templates/apply";
+import { TEMPLATES } from "@/templates/meta";
 
 /**
  * Regression test: a CV that fits on N pages in the template (PDF) must not
@@ -45,7 +46,7 @@ async function docxLayout(doc: CvDocument, name: string) {
 test.describe("Word export is about as long as the template, never longer", () => {
   test.skip(!soffice, "LibreOffice is not installed");
 
-  for (const template of ["classic", "modern-sidebar", "professional-header"]) {
+  for (const template of TEMPLATES.map((t) => t.id)) {
     for (const lang of ["he", "en"] as const) {
       test(`${template} · ${lang}`, async ({ browser }) => {
         // Grow the CV item by item; check the fullest one-page version and the first two-page version.

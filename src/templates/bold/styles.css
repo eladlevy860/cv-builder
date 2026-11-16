@@ -1,0 +1,87 @@
+/*
+ * Bold: a large name on a solid accent band, solid heading bars, and a
+ * tinted side column at the inline start (right in Hebrew).
+ */
+.tpl-bold {
+  --cv-side-w: 33%;
+  --bd-tint: color-mix(in srgb, var(--cv-accent) 9%, white);
+}
+.tpl-bold .bd-header {
+  background: var(--cv-accent);
+  color: var(--cv-on-accent);
+  padding: calc(var(--cv-margin) * 0.9) var(--cv-margin);
+}
+.tpl-bold .bd-band-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5em;
+}
+.tpl-bold .bd-band-text {
+  flex: 1;
+  min-width: 0;
+}
+.tpl-bold .bd-header :is(.cv-name, .cv-headline, .cv-contacts, .cv-icon, .cv-contact-label) {
+  color: var(--cv-on-accent);
+}
+.tpl-bold .cv-name {
+  font-size: 3.1em;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.tpl-bold .cv-headline {
+  font-size: 1.2em;
+  margin-block-start: 0.3em;
+  opacity: 0.92;
+}
+.tpl-bold .bd-header .cv-contacts {
+  margin-block-start: 0.8em;
+}
+.tpl-bold .bd-header .cv-photo {
+  width: 30mm;
+  height: 30mm;
+  border: 3px solid color-mix(in srgb, var(--cv-on-accent) 75%, transparent);
+}
+.tpl-bold .bd-main {
+  padding: var(--cv-gap) var(--cv-margin) var(--cv-margin);
+}
+.tpl-bold .bd-side {
+  background: var(--bd-tint);
+  padding: var(--cv-gap) calc(var(--cv-margin) * 0.75) var(--cv-margin);
+}
+.tpl-bold .bd-frame--rest .bd-main,
+.tpl-bold .bd-frame--rest .bd-side {
+  padding-block-start: var(--cv-margin);
+}
+.tpl-bold.cv-hs-filled .cv-heading {
+  background: var(--cv-accent);
+  color: var(--cv-on-accent);
+  padding: 0.18em 0.55em;
+  border-radius: 0;
+}
+.tpl-bold .cv-heading {
+  font-weight: 700;
+}
+.tpl-bold .cv-entry-title {
+  font-size: 1.05em;
+}
+.tpl-bold .cv-entry-subline {
+  color: var(--cv-accent);
+  font-weight: 600;
+}
+.tpl-bold .bd-side .cv-skills-list li + li {
+  margin-block-start: 0.15em;
+}
+.tpl-bold .bd-side .cv-skills + .cv-skills,
+.tpl-bold .bd-side .cv-item + .cv-item,
+.tpl-bold .bd-side .cv-block:has(> .cv-item) + .cv-block > .cv-item {
+  margin-block-start: 0.6em;
+}
+.tpl-bold .bd-side .cv-langs {
+  flex-direction: column;
+  gap: 0.2em;
+}
+.tpl-bold .bd-side .cv-entry-head {
+  flex-wrap: wrap;
+  column-gap: 0.5em;
+}

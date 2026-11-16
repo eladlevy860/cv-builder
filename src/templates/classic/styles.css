@@ -21,6 +21,6 @@
   font-size: 1.25em;
   font-weight: 600;
 }
-.tpl-classic .cv-entry-sub {
+.tpl-classic[lang="en"] .cv-entry-sub {
   font-style: italic;
 }

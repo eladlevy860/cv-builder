@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -22,15 +22,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { applyTemplate } from "@/templates/apply";
-import { TEMPLATES } from "@/templates/meta";
-import { isTemplateImplemented } from "@/templates/registry";
 import { docActions } from "@/features/dashboard/actions";
 import { cn } from "@/lib/utils";
 import { editorActions, useEditorStore } from "./store";
@@ -64,13 +58,20 @@ function SaveStatus() {
   );
 }
 
-export function EditorTopbar({ flush }: { flush: () => Promise<void> }) {
+export function EditorTopbar({
+  flush,
+  designOpen,
+  onDesign,
+  onTemplates,
+}: {
+  flush: () => Promise<void>;
+  designOpen: boolean;
+  onDesign: () => void;
+  onTemplates: () => void;
+}) {
   const t = useTranslations("editor");
   const exporter = useExport();
-  const locale = useLocale();
-  const ui = locale === "he" ? "he" : "en";
   const title = useEditorStore((s) => s.doc!.title);
-  const templateId = useEditorStore((s) => s.doc!.templateId);
   const canUndo = useEditorStore((s) => s.past.length > 0);
   const canRedo = useEditorStore((s) => s.future.length > 0);
 
@@ -101,32 +102,17 @@ export function EditorTopbar({ flush }: { flush: () => Promise<void> }) {
         </Button>
         <HistoryDialog />
         <span className="mx-1 h-5 w-px bg-border" aria-hidden />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" data-testid="template-menu">
-              <LayoutTemplateIcon />
-              <span className="hidden md:inline">{t("template")}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
-            <DropdownMenuLabel>{t("template")}</DropdownMenuLabel>
-            <DropdownMenuRadioGroup
-              value={templateId}
-              onValueChange={(id) => editorActions.update((d) => applyTemplate(d, id))}
-            >
-              {TEMPLATES.map((tpl) => {
-                const ready = isTemplateImplemented(tpl.id);
-                return (
-                  <DropdownMenuRadioItem key={tpl.id} value={tpl.id} disabled={!ready} data-testid={`template-option-${tpl.id}`}>
-                    <span className="flex-1">{tpl.name[ui]}</span>
-                    {!ready && <span className="text-xs text-muted-foreground">{t("templateSoon")}</span>}
-                  </DropdownMenuRadioItem>
-                );
-              })}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button variant="outline" size="sm" disabled title={t("designSoon")}>
+        <Button variant="outline" size="sm" onClick={onTemplates} data-testid="template-menu">
+          <LayoutTemplateIcon />
+          <span className="hidden md:inline">{t("template")}</span>
+        </Button>
+        <Button
+          variant={designOpen ? "secondary" : "outline"}
+          size="sm"
+          onClick={onDesign}
+          aria-pressed={designOpen}
+          data-testid="design-button"
+        >
           <PaletteIcon />
           <span className="hidden md:inline">{t("design")}</span>
         </Button>

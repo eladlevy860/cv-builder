@@ -7,7 +7,15 @@ import { themeStyle } from "./theme-vars";
 import type { Block, RenderContext, TemplateDefinition } from "./types";
 import type { CvDocument } from "@/core/model/schema";
 
-export type PagePlan = { main: string[][]; side: string[][] };
+export type PagePlan = { main: string[][]; side: string[][]; stats: LayoutStats };
+
+export type LayoutStats = {
+  pages: number;
+  /** How full the last page is (0–1, the fuller column for two-column templates). */
+  lastPageFill: number;
+  /** A block is taller than a page and is cut off. */
+  clipped: boolean;
+};
 
 /** Small tolerance for sub-pixel rounding. */
 const EPS = 0.5;
@@ -39,6 +47,25 @@ export function packBlocks(
     remaining -= h;
   }
   return pages;
+}
+
+/** Fill of the last page and whether any block is taller than a page. */
+export function planStats(
+  regions: Array<{ pages: string[][]; capFirst: number; capRest: number }>,
+  heights: Map<string, number>,
+): LayoutStats {
+  const pages = Math.max(1, ...regions.map((r) => r.pages.length));
+  let lastPageFill = 0;
+  let clipped = false;
+  for (const r of regions) {
+    r.pages.forEach((keys, i) => {
+      const cap = i === 0 ? r.capFirst : r.capRest;
+      const used = keys.reduce((sum, k) => sum + (heights.get(k) ?? 0), 0);
+      if (cap > 0 && used > cap + EPS) clipped = true;
+      if (i === pages - 1 && cap > 0) lastPageFill = Math.max(lastPageFill, Math.min(1, used / cap));
+    });
+  }
+  return { pages, lastPageFill: Math.round(lastPageFill * 100) / 100, clipped };
 }
 
 function samePlan(a: PagePlan | null, b: PagePlan): boolean {
@@ -114,12 +141,15 @@ export function makeContext(doc: CvDocument): RenderContext {
 export function PagedDocument({
   doc,
   onPageCount,
+  onStats,
   onReady,
   pageGap,
   renderPage,
 }: {
   doc: CvDocument;
   onPageCount?: (n: number) => void;
+  /** Called whenever the measured layout changes. */
+  onStats?: (stats: LayoutStats) => void;
   /** Called after the first pagination with loaded fonts. */
   onReady?: () => void;
   pageGap?: string;
@@ -142,10 +172,20 @@ export function PagedDocument({
     root.querySelectorAll<HTMLElement>('[data-measure="blocks"] [data-block-key]').forEach((el) => {
       heights.set(el.dataset.blockKey!, el.getBoundingClientRect().height);
     });
-    const next: PagePlan = {
-      main: packBlocks(layout.main, heights, capacity("first", "main"), capacity("rest", "main")),
-      side: layout.side.length ? packBlocks(layout.side, heights, capacity("first", "side"), capacity("rest", "side")) : [],
+    const caps = {
+      main: [capacity("first", "main"), capacity("rest", "main")] as const,
+      side: [capacity("first", "side"), capacity("rest", "side")] as const,
     };
+    const main = packBlocks(layout.main, heights, ...caps.main);
+    const side = layout.side.length ? packBlocks(layout.side, heights, ...caps.side) : [];
+    const stats = planStats(
+      [
+        { pages: main, capFirst: caps.main[0], capRest: caps.main[1] },
+        { pages: side, capFirst: caps.side[0], capRest: caps.side[1] },
+      ],
+      heights,
+    );
+    const next: PagePlan = { main, side, stats };
     setPlan((prev) => (samePlan(prev, next) ? prev : next));
   }, [layout, fontsVersion]);
 
@@ -154,6 +194,10 @@ export function PagedDocument({
   useEffect(() => {
     onPageCount?.(pageCount);
   }, [pageCount, onPageCount]);
+
+  useEffect(() => {
+    if (plan) onStats?.(plan.stats);
+  }, [plan, onStats]);
 
   useEffect(() => {
     if (plan && fontsVersion > 0) onReady?.();

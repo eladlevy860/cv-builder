@@ -1,0 +1,79 @@
+/*
+ * Minimal: generous white space, a label column for headings, one accent
+ * rule. Headings sit in the label column beside their first item.
+ */
+.tpl-minimal {
+  --min-label: 23%;
+  --min-label-gap: 4%;
+}
+.tpl-minimal .min-frame {
+  padding: var(--cv-margin);
+}
+.tpl-minimal .min-header {
+  margin-block-end: calc(var(--cv-gap) * 1.2);
+}
+.tpl-minimal .cv-name {
+  font-weight: 500;
+  font-size: 2.5em;
+  letter-spacing: -0.01em;
+  color: #111827;
+}
+.tpl-minimal .cv-headline {
+  color: var(--cv-accent);
+  font-size: 1.1em;
+}
+.tpl-minimal .min-rule {
+  display: block;
+  width: 3.2em;
+  height: 2px;
+  margin-block: 0.8em 0.7em;
+  background: var(--cv-accent);
+}
+.tpl-minimal .cv-contacts {
+  color: #4b5563;
+}
+.tpl-minimal .cv-icon {
+  color: #9ca3af;
+}
+
+/* Blocks are indented by the label column; a section's first row holds the heading in that column. */
+.tpl-minimal .min-frame .cv-block {
+  padding-inline-start: calc(var(--min-label) + var(--min-label-gap));
+}
+.tpl-minimal .min-frame .cv-block:has(> .min-row) {
+  padding-inline-start: 0;
+}
+.tpl-minimal .min-row {
+  display: grid;
+  grid-template-columns: var(--min-label) minmax(0, 1fr);
+  column-gap: var(--min-label-gap);
+  padding-block-start: var(--cv-gap);
+}
+.tpl-minimal .cv-region > .cv-block:first-child > .min-row {
+  padding-block-start: 0;
+}
+.tpl-minimal .min-label .cv-heading {
+  margin: 0;
+  font-size: 0.95em;
+  line-height: var(--cv-lh);
+  color: var(--cv-accent);
+}
+.tpl-minimal.cv-hs-caps .min-label .cv-heading {
+  font-size: 0.86em;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  /* Same baseline as the body text next to it. */
+  line-height: calc(var(--cv-lh) / 0.86);
+}
+.tpl-minimal.cv-hs-line .min-label .cv-heading {
+  padding-block-end: 0.15em;
+}
+.tpl-minimal.cv-hs-filled .min-label .cv-heading {
+  padding: 0.05em 0.45em;
+}
+.tpl-minimal .cv-block:has(> .min-row) + .cv-block > :is(.cv-item, .cv-item-row) {
+  margin-block-start: calc(var(--cv-gap) * 0.5);
+}
+.tpl-minimal .cv-entry-title {
+  font-weight: 600;
+}

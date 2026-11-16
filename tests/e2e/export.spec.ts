@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import JSZip from "jszip";
 import { expect, test, type Page } from "@playwright/test";
+import { TEMPLATES } from "@/templates/meta";
 import { pdfLogicalLines } from "./pdf-text";
 
 /** The bidi fixture strings (same as BIDI_FIXTURE_STRINGS in src/core/samples). */
@@ -41,7 +42,7 @@ async function download(page: Page, testId: string, file: string) {
 }
 
 test.describe("export", () => {
-  for (const template of ["classic", "modern-sidebar", "professional-header"]) {
+  for (const template of TEMPLATES.map((t) => t.id)) {
     test(`Hebrew PDF keeps every bidi fixture string in logical order (${template})`, async ({ page }) => {
       await openSample(page, "he", template);
       const pdf = await download(page, "download-pdf", `bidi-fixture-he-${template}.pdf`);
