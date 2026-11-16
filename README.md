@@ -247,6 +247,7 @@ Generated in the browser with the `docx` package (`src/core/export/docx.ts`), an
 - **Content:** a single-column version of the CV with the same sections, order and content as the template. Hidden sections and items are left out, the same as in the preview.
 - **Direction:** Hebrew documents use bidirectional paragraphs and sections. Every run has an explicit direction (`w:rtl`), and runs in the opposite direction are wrapped in invisible LRM/RLM marks. Word and LibreOffice don't isolate runs the way browsers do, and without the marks `10/2023 – 02/2025` would come out as `02/2025 – 10/2023`.
 - **Fonts:** Word can't use the web fonts, so sans-serif themes map to Arial and serif themes to Times New Roman. Both include Hebrew on Windows and macOS.
+- **Length:** the Word file is laid out about 10–15% tighter than the template (`WORD_DENSITY` in `docx.ts`), so a CV that fits on one page in the template also fits on one page in Word. The two-column templates' sidebar content becomes extra lines in Word's single column, and Word lays out text slightly differently from Chromium. `tests/e2e/docx-fit.spec.ts` fills each template to a full page in both languages and checks the Word file isn't longer, using LibreOffice (the test is skipped if LibreOffice isn't installed).
 
 ### Bidi verification
 

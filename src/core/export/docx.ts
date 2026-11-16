@@ -42,6 +42,8 @@ type Ctx = {
   headingFont: string;
   /** Half-points. */
   size: number;
+  /** Space before a section heading, in twips. */
+  gap: number;
   contentWidth: number;
   listInstance: number;
 };
@@ -52,8 +54,20 @@ function officeFont(id: keyof typeof FONTS): string {
 
 const ptToTwip = (pt: number) => Math.round(pt * 20);
 
+/**
+ * Word's "auto" line spacing is a multiple of the font's own line height
+ * (≈1.15 em for Arial), while CSS line-height is a multiple of the font size.
+ * Convert, then tighten by 10%: Word documents should come out slightly
+ * shorter than the template so a one-page CV stays one page in Word too.
+ */
+export const WORD_DENSITY = 0.9;
+function wordLineSpacing(cssLineHeight: number): number {
+  return Math.round(240 * (cssLineHeight / 1.15) * WORD_DENSITY);
+}
+
 const LRM = "\u200E";
 const RLM = "\u200F";
+const WJ = "\u2060";
 
 /**
  * Word and LibreOffice do not isolate runs the way browsers do: a number-only
@@ -80,12 +94,15 @@ function runs(ctx: Ctx, text: string, opts: Omit<IRunOptions, "text"> = {}, base
   if (!text) return [];
   const dir = base ?? (ctx.rtl ? "rtl" : "ltr");
   const font = (opts.font as string | undefined) ?? ctx.bodyFont;
-  return splitRuns(text, dir).map(
-    (r) =>
+  const parts = splitRuns(text, dir);
+  return parts.map(
+    (r, i) =>
       new TextRun({
         size: ctx.size,
         ...opts,
-        text: pin(r.text, r.rtl, ctx.rtl),
+        // After an opening bracket, a word joiner stops editors from breaking
+        // the line between "(" and the pinned run that follows it.
+        text: (/[([{]$/.test(parts[i - 1]?.text ?? "") && r.rtl !== ctx.rtl ? WJ : "") + pin(r.text, r.rtl, ctx.rtl),
         rightToLeft: r.rtl,
         font: { ascii: font, hAnsi: font, cs: font },
         language: { value: ctx.lang === "he" ? "he-IL" : "en-US", bidirectional: "he-IL" },
@@ -116,7 +133,7 @@ function para(ctx: Ctx, children: ParagraphChild[], opts: Partial<ConstructorPar
   return new Paragraph({
     bidirectional: ctx.rtl,
     alignment: AlignmentType.START,
-    spacing: { after: 40 },
+    spacing: { after: 0 },
     ...opts,
     children,
   });
@@ -165,7 +182,7 @@ function richText(ctx: Ctx, rt: RichText): Paragraph[] {
           para(ctx, inlineChildren(ctx, p.content), {
             numbering: i === 0 ? { reference: ordered ? NUMBERS : BULLETS, level: 0, instance } : undefined,
             indent: i === 0 ? undefined : { start: 360 },
-            spacing: { after: 20 },
+            spacing: { after: 0 },
           }),
         );
       });
@@ -175,9 +192,9 @@ function richText(ctx: Ctx, rt: RichText): Paragraph[] {
 }
 
 function heading(ctx: Ctx, section: Section): Paragraph {
-  return para(ctx, runs(ctx, sectionTitle(section, ctx.lang), { bold: true, color: ctx.accent.slice(1), size: Math.round(ctx.size * 1.25), font: ctx.headingFont }), {
+  return para(ctx, runs(ctx, sectionTitle(section, ctx.lang), { bold: true, color: ctx.accent.slice(1), size: Math.round(ctx.size * 1.2), font: ctx.headingFont }), {
     keepNext: true,
-    spacing: { before: ptToTwip(mmToPt(ctx.doc.theme.sectionSpacing)), after: 80 },
+    spacing: { before: ctx.gap, after: 50 },
     border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: ctx.accent.slice(1), space: 2 } },
   });
 }
@@ -194,7 +211,7 @@ function entryParagraphs(ctx: Ctx, e: Entry): Paragraph[] {
   out.push(
     para(ctx, head, {
       keepNext: true,
-      spacing: { before: 120, after: 20 },
+      spacing: { before: Math.round(ctx.gap * 0.45), after: 0 },
       tabStops: [{ type: TabStopType.END, position: ctx.contentWidth }],
     }),
   );
@@ -224,7 +241,7 @@ function skillsParagraphs(ctx: Ctx, section: SectionOf<"skills">): Paragraph[] {
           children.push(...runs(ctx, ` (${s.levelText || levelLabel(s.level, ctx.lang)})`, { color: "6B7280" }));
         }
       });
-    return para(ctx, children, { spacing: { after: 60 } });
+    return para(ctx, children, { spacing: { after: 30 } });
   });
 }
 
@@ -261,7 +278,7 @@ function headerParagraphs(ctx: Ctx): Paragraph[] {
   const b = ctx.doc.basics;
   const out: Paragraph[] = [];
   if (b.name.trim()) {
-    out.push(para(ctx, field(ctx, b.name, { bold: true, size: Math.round(ctx.size * 2.3), color: ctx.accent.slice(1), font: ctx.headingFont }), { spacing: { after: 40 } }));
+    out.push(para(ctx, field(ctx, b.name, { bold: true, size: Math.round(ctx.size * 2.1), color: ctx.accent.slice(1), font: ctx.headingFont }), { spacing: { after: 0 } }));
   }
   if (b.headline.trim()) out.push(para(ctx, field(ctx, b.headline, { size: Math.round(ctx.size * 1.15), color: "374151" })));
   const contacts: ParagraphChild[][] = [];
@@ -282,7 +299,7 @@ function headerParagraphs(ctx: Ctx): Paragraph[] {
     });
     out.push(
       para(ctx, children, {
-        spacing: { before: 60, after: 120 },
+        spacing: { before: 60, after: 60 },
         border: { bottom: { style: BorderStyle.SINGLE, size: 12, color: ctx.accent.slice(1), space: 6 } },
       }),
     );
@@ -300,7 +317,8 @@ export function buildDocx(doc: CvDocument): Document {
     accent: doc.theme.accentColor,
     bodyFont: officeFont(doc.theme.fontBody),
     headingFont: officeFont(doc.theme.fontHeading),
-    size: Math.round(doc.theme.baseFontSize * 2 * 1.05),
+    size: Math.round(doc.theme.baseFontSize * 2),
+    gap: Math.round(ptToTwip(mmToPt(doc.theme.sectionSpacing)) * 0.75),
     contentWidth: convertMillimetersToTwip(page.w) - 2 * margin,
     listInstance: 0,
   };
@@ -314,7 +332,7 @@ export function buildDocx(doc: CvDocument): Document {
       default: {
         document: {
           run: { font: { ascii: ctx.bodyFont, hAnsi: ctx.bodyFont, cs: ctx.bodyFont }, size: ctx.size, color: "1F2937" },
-          paragraph: { spacing: { line: Math.round(240 * Math.min(doc.theme.lineHeight, 1.6) * 0.85) } },
+          paragraph: { spacing: { line: wordLineSpacing(doc.theme.lineHeight) } },
         },
       },
     },

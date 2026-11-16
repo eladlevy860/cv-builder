@@ -14,7 +14,7 @@ type Para = { bidi: boolean; runs: Run[]; text: string };
 
 // Directional marks (LRM/RLM) are invisible; strip them before comparing text.
 const unescape = (s: string) =>
-  s.replace(/[\u200E\u200F]/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+  s.replace(/[\u200E\u200F\u2060]/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
 
 /** Minimal parse of word/document.xml: paragraphs, runs, run direction. */
 async function readDocx(buf: Buffer): Promise<Para[]> {
