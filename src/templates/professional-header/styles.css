@@ -1,0 +1,48 @@
+/* Professional Header: full-width colored band, single column. ATS-friendly. */
+.tpl-professional-header .ph-band {
+  background: var(--cv-accent);
+  color: var(--cv-on-accent);
+  padding-block: calc(var(--cv-margin) * 0.85);
+  padding-inline: var(--cv-margin);
+}
+.tpl-professional-header .ph-band-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5em;
+}
+.tpl-professional-header .ph-band-text {
+  flex: 1;
+  min-width: 0;
+}
+.tpl-professional-header .ph-band .cv-name,
+.tpl-professional-header .ph-band .cv-headline,
+.tpl-professional-header .ph-band .cv-contacts,
+.tpl-professional-header .ph-band .cv-icon,
+.tpl-professional-header .ph-band .cv-contact-label {
+  color: var(--cv-on-accent);
+}
+.tpl-professional-header .ph-band .cv-headline {
+  opacity: 0.9;
+}
+.tpl-professional-header .ph-band .cv-contacts {
+  margin-block-start: 0.7em;
+  opacity: 0.95;
+}
+.tpl-professional-header .ph-band .cv-photo {
+  width: 28mm;
+  height: 28mm;
+  border: 2px solid color-mix(in srgb, var(--cv-on-accent) 70%, transparent);
+}
+.tpl-professional-header .ph-body {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--cv-gap) + 1mm) var(--cv-margin) var(--cv-margin);
+}
+.tpl-professional-header .ph-body--rest {
+  padding-block-start: var(--cv-margin);
+}
+.tpl-professional-header .cv-heading {
+  letter-spacing: 0.02em;
+}

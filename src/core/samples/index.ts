@@ -76,7 +76,7 @@ function hebrewSample(): CvDocument {
       institution: "הטכניון – מכון טכנולוגי לישראל",
       location: "חיפה",
       dates: { start: { year: 2022, month: 10 }, end: { year: 2026, month: 7 }, present: false },
-      grade: "ממוצע 88",
+      grade: "88",
       description: richTextFromPlain("פרויקט גמר: מערכת אחיזה רובוטית למפעל ייצור (2023–2025)"),
     },
   ];
@@ -182,7 +182,7 @@ function englishSample(): CvDocument {
       institution: "Technion – Israel Institute of Technology",
       location: "Haifa",
       dates: { start: { year: 2022, month: 10 }, end: { year: 2026, month: 7 }, present: false },
-      grade: "GPA 88",
+      grade: "88",
       description: richTextFromPlain("Capstone: robotic gripper for a production line (2023–2025)"),
     },
   ];

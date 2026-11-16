@@ -107,3 +107,42 @@ describe("rich text", () => {
     expect(countBullets(rt)).toBe(2);
   });
 });
+
+import { normalizeRichText } from "@/core/model/richtext";
+
+describe("normalizeRichText", () => {
+  it("drops unsupported marks/attrs, flattens nested lists and trims empty tail", () => {
+    const input = {
+      type: "doc",
+      content: [
+        { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Title", marks: [{ type: "underline" }, { type: "bold" }] }] },
+        {
+          type: "bulletList",
+          content: [
+            {
+              type: "listItem",
+              content: [
+                { type: "paragraph", content: [{ type: "text", text: "a", marks: [{ type: "link", attrs: { href: "https://x.y", target: "_blank" } }] }] },
+                { type: "bulletList", content: [{ type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "nested" }] }] }] },
+              ],
+            },
+          ],
+        },
+        { type: "paragraph" },
+      ],
+    };
+    expect(normalizeRichText(input)).toEqual({
+      type: "doc",
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "Title", marks: [{ type: "bold" }] }] },
+        {
+          type: "bulletList",
+          content: [
+            { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "a", marks: [{ type: "link", attrs: { href: "https://x.y" } }] }] }] },
+            { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "nested" }] }] },
+          ],
+        },
+      ],
+    });
+  });
+});

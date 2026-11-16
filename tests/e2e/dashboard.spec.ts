@@ -115,7 +115,7 @@ test.describe("dashboard", () => {
 
     // Open → editor route resolves the document by id
     await cardByTitle(page, "קו״ח – מהנדס מכונות").getByTestId("doc-title").click();
-    await expect(page.getByTestId("editor-title")).toHaveText("קו״ח – מהנדס מכונות");
+    await expect(page.getByTestId("doc-title-input")).toHaveValue("קו״ח – מהנדס מכונות");
     expect(errors).toEqual([]);
   });
 

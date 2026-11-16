@@ -1,0 +1,26 @@
+/* Classic: single column, serif headings, thin dividers. ATS-friendly. */
+.tpl-classic .classic-frame {
+  padding: var(--cv-margin);
+}
+.tpl-classic .classic-header {
+  padding-block-end: 0.8em;
+  margin-block-end: var(--cv-gap);
+  border-block-end: 2px solid var(--cv-accent);
+}
+.tpl-classic .cv-name {
+  font-size: 2.3em;
+  color: var(--cv-accent);
+}
+.tpl-classic .cv-headline {
+  font-size: 1.1em;
+}
+.tpl-classic .cv-contacts {
+  margin-block-start: 0.55em;
+}
+.tpl-classic .cv-heading {
+  font-size: 1.25em;
+  font-weight: 600;
+}
+.tpl-classic .cv-entry-sub {
+  font-style: italic;
+}

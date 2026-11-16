@@ -39,25 +39,107 @@ export function isAlwaysLtr(value: string): boolean {
   return k === "email" || k === "url" || k === "phone";
 }
 
-/**
- * Splits text into runs of RTL text and "LTR tokens" (Latin words, numbers,
- * and their joining punctuation such as `C++`, `GD&T`, `ISO 9001:2015`,
- * `05/2025`). Used by the DOCX exporter, which needs explicit run direction.
- */
-export function splitBidiRuns(s: string): Array<{ text: string; rtl: boolean }> {
-  const runs: Array<{ text: string; rtl: boolean }> = [];
-  // An LTR run starts at a Latin letter/digit and extends over Latin/digits,
-  // spaces and neutral punctuation as long as no Hebrew letter appears.
-  const re = /[A-Za-z0-9+#@][A-Za-z0-9+#@&.:/_%\-–—()'"\s,]*[A-Za-z0-9+#%)]|[A-Za-z0-9]/g;
-  let last = 0;
-  for (const m of s.matchAll(re)) {
-    const idx = m.index ?? 0;
-    if (idx > last) runs.push({ text: s.slice(last, idx), rtl: true });
-    runs.push({ text: m[0], rtl: false });
-    last = idx + m[0].length;
+export type BidiRun = { text: string; rtl: boolean };
+
+const isHebrewChar = (ch: string) => /[\u0590-\u05FF\uFB1D-\uFB4F]/.test(ch);
+const isLatinOrDigit = (ch: string) => /[A-Za-z0-9\u00C0-\u024F]/.test(ch);
+/** Characters that may close an LTR token right after a letter/digit (C++, C#, 12%). */
+const LTR_TRAILERS = new Set(["+", "#", "%"]);
+const OPEN: Record<string, string> = { "(": ")", "[": "]", "{": "}" };
+const CLOSE: Record<string, string> = { ")": "(", "]": "[", "}": "{" };
+
+function balanced(s: string): boolean {
+  const stack: string[] = [];
+  for (const ch of s) {
+    if (OPEN[ch]) stack.push(ch);
+    else if (CLOSE[ch]) {
+      if (stack.pop() !== CLOSE[ch]) return false;
+    }
   }
-  if (last < s.length) runs.push({ text: s.slice(last), rtl: true });
-  return runs.filter((r) => r.text.length > 0);
+  return stack.length === 0;
+}
+
+/**
+ * Splits text into direction runs relative to a base direction.
+ *
+ * - Base **rtl**: finds LTR tokens — spans that start and end with a Latin
+ *   letter or digit and contain no Hebrew (`C++`, `GD&T`, `ISO 9001:2015`,
+ *   `SolidWorks 2024`, `05/2025`, `(2023–2025)`). Surrounding brackets are
+ *   included only in balanced pairs so they never get mirrored apart.
+ * - Base **ltr**: finds Hebrew spans (start and end with a Hebrew letter,
+ *   no Latin letters or digits inside).
+ *
+ * Renderers isolate each opposite-direction run (`<span dir unicode-bidi:
+ * isolate>`); the DOCX exporter maps runs to `rightToLeft` runs.
+ */
+export function splitRuns(text: string, base: "rtl" | "ltr"): BidiRun[] {
+  const chars = Array.from(text);
+  const out: BidiRun[] = [];
+  const baseRtl = base === "rtl";
+  let i = 0;
+  let plainStart = 0;
+
+  const flushPlain = (end: number) => {
+    if (end > plainStart) out.push({ text: chars.slice(plainStart, end).join(""), rtl: baseRtl });
+  };
+
+  while (i < chars.length) {
+    const ch = chars[i];
+    const opens = baseRtl ? isLatinOrDigit(ch) || (ch === "+" && isLatinOrDigit(chars[i + 1] ?? "")) : isHebrewChar(ch);
+    if (!opens) {
+      i++;
+      continue;
+    }
+    // Extend to the furthest strong char of the run's direction without crossing the other script.
+    let j = i;
+    let lastStrong = i;
+    while (j < chars.length) {
+      const c = chars[j];
+      if (baseRtl ? isHebrewChar(c) : isLatinOrDigit(c)) break;
+      if (baseRtl ? isLatinOrDigit(c) : isHebrewChar(c)) lastStrong = j;
+      j++;
+    }
+    let end = lastStrong + 1;
+    if (baseRtl) {
+      while (end < chars.length && LTR_TRAILERS.has(chars[end])) end++;
+    } else {
+      // Hebrew abbreviations end with geresh/gershayim or a quote: צב"ד, ת"א
+      while (end < chars.length && /["'\u05F3\u05F4]/.test(chars[end]) && isHebrewChar(chars[end - 1])) {
+        if (end + 1 < chars.length && isHebrewChar(chars[end + 1])) end++;
+        else break;
+      }
+    }
+    let start = i;
+    // Include an enclosing bracket pair: "(2023–2025)"
+    while (start > 0 && end < chars.length && OPEN[chars[start - 1]] === chars[end]) {
+      start--;
+      end++;
+    }
+    // Drop unbalanced brackets from the inside of the run.
+    let runText = chars.slice(start, end).join("");
+    while (!balanced(runText) && end > start + 1 && CLOSE[chars[end - 1]]) {
+      end--;
+      while (end > start + 1 && /\s/.test(chars[end - 1])) end--;
+      runText = chars.slice(start, end).join("");
+    }
+    if (!balanced(runText)) {
+      // Give up isolating brackets; isolate only the core token.
+      start = i;
+      end = lastStrong + 1;
+      runText = chars.slice(start, end).join("");
+    }
+    flushPlain(start);
+    out.push({ text: runText, rtl: !baseRtl });
+    i = end;
+    plainStart = end;
+  }
+  flushPlain(chars.length);
+  return out;
+}
+
+/** Backwards-compatible helper: runs relative to an RTL base. */
+export function splitBidiRuns(s: string): BidiRun[] {
+  return splitRuns(s, "rtl");
 }
 
 export function containsLatin(s: string): boolean {

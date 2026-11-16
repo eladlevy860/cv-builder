@@ -7,6 +7,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   reporter: [["list"]],
+  expect: { toHaveScreenshot: { animations: "disabled" } },
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "off",

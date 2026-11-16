@@ -5,6 +5,7 @@ import { Providers } from "@/components/shell/providers";
 import { localeDir } from "@/i18n/config";
 import "./fonts";
 import "./globals.css";
+import "@/templates/styles.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("app");

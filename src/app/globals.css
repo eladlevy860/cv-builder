@@ -111,3 +111,30 @@
   direction: ltr;
   unicode-bidi: isolate;
 }
+
+/* Rich-text editor content (form side). Each paragraph takes its own direction. */
+.rte .rte-content {
+  outline: none;
+  min-height: inherit;
+}
+.rte .rte-content :where(p, li) {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+.rte .rte-content p + p {
+  margin-block-start: 0.35em;
+}
+.rte .rte-content ul,
+.rte .rte-content ol {
+  padding-inline-start: 1.3em;
+}
+.rte .rte-content ul {
+  list-style: disc;
+}
+.rte .rte-content ol {
+  list-style: decimal;
+}
+.rte .rte-content a {
+  color: var(--primary);
+  text-decoration: underline;
+}

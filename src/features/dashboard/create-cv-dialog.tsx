@@ -11,6 +11,7 @@ import { createCv } from "@/core/model/factory";
 import type { Language } from "@/core/model/schema";
 import { createSampleCv } from "@/core/samples";
 import { getStorage } from "@/core/storage";
+import { applyTemplate } from "@/templates/apply";
 import { TEMPLATES } from "@/templates/meta";
 import { cn } from "@/lib/utils";
 import { DocThumbnail } from "./doc-thumbnail";
@@ -48,9 +49,8 @@ export function CreateCvDialog({
   async function start(kind: "blank" | "sample") {
     setBusy(true);
     try {
-      const doc = kind === "sample" ? createSampleCv(language, templateId) : createCv({ language, templateId });
-      const meta = TEMPLATES.find((x) => x.id === templateId);
-      if (meta) doc.theme.accentColor = meta.defaultAccent;
+      const doc = kind === "sample" ? createSampleCv(language) : createCv({ language });
+      applyTemplate(doc, templateId, true);
       await getStorage().putDocument(doc);
       toast.success(t("create.created"));
       onCreated?.(doc.id);
