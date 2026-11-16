@@ -160,7 +160,6 @@
     "downloadDocx": "Word (simplified layout)",
     "downloadJson": "JSON backup",
     "print": "Print / Save as PDF",
-    "exportSoon": "Phase 3",
     "history": "Version history",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
@@ -175,7 +174,14 @@
     "previewRegion": "Live preview",
     "previewHint": "Click any part of the preview to jump to it in the form.",
     "versionSaved": "Version saved",
-    "shortcuts": "Shortcuts: Ctrl+Z undo, Ctrl+Shift+Z redo, Ctrl+S save a version"
+    "shortcuts": "Shortcuts: Ctrl+Z undo, Ctrl+Shift+Z redo, Ctrl+S save a version",
+    "pdfPreparing": "Creating PDF…",
+    "pdfReady": "PDF downloaded",
+    "pdfFailed": "Could not create the PDF: {message}",
+    "pdfFallback": "Server PDF is not available here, so the print dialog opens instead. Choose “Save as PDF”.",
+    "docxHint": "Single-column version. The layout is simpler than the template.",
+    "docxReady": "Word file downloaded",
+    "printBlocked": "Allow pop-ups for this site to print."
   },
   "thumb": {
     "label": "Preview of {title}"

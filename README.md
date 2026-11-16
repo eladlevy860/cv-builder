@@ -2,10 +2,10 @@
 
 A local-first web app for writing CVs and cover letters in **Hebrew (RTL)** and **English (LTR)**. Right-to-left support is built in from the start, not added afterwards. All data stays in your browser (IndexedDB). You can back everything up to JSON and restore it.
 
-> **Status: Phase 2 (Editor core) done.**
-> - **Phase 1:** the app shell in Hebrew and English with RTL mirroring, the data model with migrations, Dexie storage, the dashboard, and JSON backup/import.
-> - **Phase 2:** the split-screen editor with every section type (including Military Service), drag-and-drop, autosave, undo/redo, version history, and a live paginated A4 preview. Three templates work in both directions: Classic, Modern Sidebar and Professional Header.
-> - **Still to come:** PDF/DOCX export (phase 3), the other seven templates and the design panel (phase 4).
+> **Status: Phase 3 (Export) done.**
+> - **Phase 1:** the app shell in Hebrew and English with RTL mirroring, data model and migrations, Dexie storage, the dashboard, and JSON backup/import.
+> - **Phase 2:** the split-screen editor, every section type including Military Service, drag-and-drop, autosave, undo/redo, version history, a paginated live preview, and three templates.
+> - **Phase 3:** PDF via headless Chromium, a "Print / Save as PDF" fallback, Word export with right-to-left Hebrew paragraphs, and the bidi test strings checked in the preview, the PDF and the DOCX.
 
 ## Requirements
 
@@ -13,6 +13,23 @@ A local-first web app for writing CVs and cover letters in **Hebrew (RTL)** and 
 - Linux, macOS or Windows. The commands below are for Linux.
 
 ## Install and run
+
+### Windows (PowerShell, not as administrator)
+
+```powershell
+cd $HOME
+mkdir Projects; cd Projects        # any folder outside system32 / OneDrive
+git clone https://github.com/eladlevy860/cv-builder.git
+cd cv-builder
+git checkout claude/bilingual-cv-builder-c9dr3p
+npm install
+npx playwright install chromium    # needed for PDF export and browser tests
+npm run dev                        # http://localhost:3000
+```
+
+If PowerShell says "running scripts is disabled", run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once.
+
+### Linux / macOS
 
 ```bash
 npm install
@@ -38,9 +55,9 @@ npm run start        # http://localhost:3000
 | `npm run test:e2e` | Builds, then runs the Playwright end-to-end and visual snapshot tests against `next start` on port 3100 |
 | `npm run check` | typecheck + lint + unit tests |
 
-### Playwright and Chromium on Linux
+### Playwright and Chromium
 
-The end-to-end tests (and, from phase 3, PDF export) use headless Chromium:
+PDF export and the end-to-end tests use headless Chromium. On Windows and macOS, `npx playwright install chromium` is all you need. On Linux:
 
 ```bash
 npx playwright install --with-deps chromium
@@ -55,6 +72,19 @@ sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 
 ```
 
 (On 22.04 the last audio package is `libasound2`.)
+
+**Linux servers and containers:** set a UTF-8 locale (`LANG=C.UTF-8`). Without one, Chromium saves downloads with Hebrew names as a file called `download`. The Playwright config sets it for tests, and the Dockerfile sets it for production.
+
+If Chromium isn't installed, the app still works. **Download → PDF** reports that server PDF is unavailable and offers the browser's **Print / Save as PDF** instead.
+
+### Visual snapshot baselines
+
+The committed screenshots in `tests/e2e/visual.spec.ts-snapshots/` are for Linux (`*-chromium-linux.png`). On Windows or macOS, fonts render slightly differently, so create local baselines once:
+
+```bash
+npm run build
+npx playwright test visual --update-snapshots
+```
 
 ## Tech stack
 
@@ -79,12 +109,13 @@ src/
       page.tsx              landing
       dashboard/            documents dashboard
       editor/[id]/          split-screen editor
+    api/pdf/route.ts        POST document → PDF
     render/                 bare document renderer (Chromium PDF + visual tests)
   core/                     framework-free logic, fully unit-tested
     model/                  zod schemas + types, factories, rich-text AST, fonts, operations
     migrations/             schemaVersion migrations
     storage/                StorageAdapter interface + Dexie implementation
-    export/                 JSON backup/import, JSON Resume import
+    export/                 JSON backup/import, JSON Resume import, docx.ts (Word export)
     i18n-doc/               labels that appear *inside documents*: section titles, dates
     bidi/                   direction detection, LTR-token splitting, Israeli phone formatting
     samples/                Hebrew and English sample CVs (the Hebrew one is the bidi fixture)
@@ -96,6 +127,8 @@ src/
     primitives/             text.tsx (all bidi handling), parts.tsx, build.tsx
     paginator.tsx           measures blocks and packs them into real pages
     base.css, <id>/         shared and per-template styles
+  server/pdf.ts             headless Chromium PDF rendering (used by app/api/pdf)
+  features/export/          client export actions (PDF, DOCX, print)
   features/dashboard/       dashboard UI (cards, create flow, dialogs)
   features/editor/          store (history), autosave, form panels, preview, topbar
   components/ui/            shadcn/ui components
@@ -184,11 +217,54 @@ A template is a `TemplateDefinition` (`src/templates/types.ts`):
 4. Register the template in `src/templates/registry.ts` and add its id to `tests/e2e/visual.spec.ts`.
 5. Run `npx playwright test visual --update-snapshots`, then check the new PNGs in both languages.
 
-## PDF pipeline (phase 3, planned)
+## Export
 
-The client POSTs the document JSON to `/api/pdf`. The route keeps one Playwright Chromium instance and opens the app's own `/render` page (already in place) with the document injected as `window.__CV_DOC__`. It waits for `window.__RENDER_DONE__` (fonts loaded and pages laid out), then calls `page.pdf({ preferCSSPageSize: true, printBackground: true })`. Because Chromium renders the same HTML/CSS and fonts as the preview, the two match exactly and Hebrew bidi is shaped correctly. A **Print / Save as PDF** fallback uses the browser's own print dialog with `@page` CSS.
+### PDF (server-side headless Chromium)
+
+```
+browser ──POST /api/pdf {document}──▶ route.ts ──▶ src/server/pdf.ts
+                                                  │  one shared Chromium, new context per request
+                                                  │  addInitScript(window.__CV_DOC__ = document)
+                                                  │  goto <origin>/render   (same React templates)
+                                                  │  wait for window.__RENDER_DONE__ (fonts + pagination)
+                                                  ▼  page.pdf({ preferCSSPageSize, printBackground, tagged })
+browser ◀──────────── application/pdf (Hebrew file name kept via filename*=UTF-8'') ──┘
+```
+
+- **The document comes from the browser.** It lives in your IndexedDB, so the browser sends it. The route validates and migrates it with zod, and rejects bodies over 8 MB and cross-origin requests.
+- **The render page can only load this app's own assets.** Every other request is blocked, so links or photo URLs in a CV can never make the server fetch anything.
+- **The PDF is identical to the preview.** It uses the same components, CSS, self-hosted fonts and paginator: `@page` sets the paper size, and each `.cv-page` is one PDF page. Fonts are embedded as subsets, and the PDF is tagged, so text extraction and ATS parsing work.
+- **Behind a reverse proxy,** set `PDF_RENDER_ORIGIN` (for example `http://127.0.0.1:3000`) if the server can't reach its own public URL.
+
+### Print / Save as PDF (fallback)
+
+**Download → Print / Save as PDF**, **Ctrl+P** in the editor, or the dashboard card menu opens `/render?id=<id>&print=1` in a new tab. That page reads the CV from this browser's storage, lays out the same pages with the right `@page` size and zero margins, and opens the print dialog. This works on any host, including static or serverless deployments without Chromium.
+
+### Word (.docx)
+
+Generated in the browser with the `docx` package (`src/core/export/docx.ts`), and labelled **"Word (simplified layout)"** in the UI.
+
+- **Content:** a single-column version of the CV with the same sections, order and content as the template. Hidden sections and items are left out, the same as in the preview.
+- **Direction:** Hebrew documents use bidirectional paragraphs and sections. Every run has an explicit direction (`w:rtl`), and runs in the opposite direction are wrapped in invisible LRM/RLM marks. Word and LibreOffice don't isolate runs the way browsers do, and without the marks `10/2023 – 02/2025` would come out as `02/2025 – 10/2023`.
+- **Fonts:** Word can't use the web fonts, so sans-serif themes map to Arial and serif themes to Times New Roman. Both include Hebrew on Windows and macOS.
+
+### Bidi verification
+
+The Hebrew sample CV contains every string in `BIDI_FIXTURE_STRINGS`, and the tests check each output:
+
+| Output | Test |
+| --- | --- |
+| Preview | `tests/e2e/editor.spec.ts`: each LTR token is inside an LTR-isolated span |
+| PDF | `tests/e2e/export.spec.ts`: downloads the PDF for each template, extracts text with pdf.js, rebuilds logical order (`tests/e2e/pdf-text.ts`) and checks every fixture string |
+| DOCX | `tests/unit/docx.test.ts`: paragraph and run direction, LRM pinning, section order. `tests/e2e/export.spec.ts` checks the downloaded file |
+
+Generated files are kept for inspection in `test-output/` (`e2e-exports/*.pdf|docx` and `docx/sample-*.docx`).
 
 ## Deploying
 
-- **Docker on a VPS, Fly.io, Render or Railway (recommended).** Base the image on `mcr.microsoft.com/playwright:v1.63.0-noble`, which includes Chromium and its system libraries, then run `npm ci && npm run build && npm start`. PDF generation works out of the box.
+- **Docker on a VPS, Fly.io, Render or Railway (recommended).** The included `Dockerfile` is based on `mcr.microsoft.com/playwright:v1.63.0-noble`, which includes Chromium and its system libraries, and sets `LANG=C.UTF-8` and `PDF_RENDER_ORIGIN`. It hasn't been built yet: the development sandbox has no Docker daemon.
+  ```bash
+  docker build -t cv-builder .
+  docker run -p 3000:3000 cv-builder
+  ```
 - **Vercel / serverless.** The app itself deploys as is. Server-side PDF needs `playwright-core` plus a slim Chromium build such as `@sparticuz/chromium`, which brings a function size limit (about 50MB compressed), 2–5s cold starts and execution time limits. Fonts still load from the app's own `/render` page, so they stay identical. It works but is more fragile than Docker. The in-browser **Print / Save as PDF** fallback works on any host.

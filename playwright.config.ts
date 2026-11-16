@@ -2,6 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = Number(process.env.E2E_PORT ?? 3100);
 
+// Chromium needs a UTF-8 locale on Linux to save downloads with Hebrew
+// file names; minimal containers often have none set.
+if (process.platform === "linux" && !process.env.LANG && !process.env.LC_ALL) process.env.LANG = "C.UTF-8";
+
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: false,

@@ -102,6 +102,8 @@ export function splitRuns(text: string, base: "rtl" | "ltr"): BidiRun[] {
     let end = lastStrong + 1;
     if (baseRtl) {
       while (end < chars.length && LTR_TRAILERS.has(chars[end])) end++;
+      // Abbreviations keep their final dot: "B.Sc.", "M.Sc.", "Ph.D."
+      if (chars[end] === "." && /[A-Za-z]\.[A-Za-z]+$/.test(chars.slice(i, end).join(""))) end++;
     } else {
       // Hebrew abbreviations end with geresh/gershayim or a quote: צב"ד, ת"א
       while (end < chars.length && /["'\u05F3\u05F4]/.test(chars[end]) && isHebrewChar(chars[end - 1])) {

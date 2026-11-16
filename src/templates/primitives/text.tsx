@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { detectDir, splitRuns } from "@/core/bidi";
+import { detectDir, hasHebrew, splitRuns } from "@/core/bidi";
 import type { RichText, RTInline, RTMark } from "@/core/model/richtext";
 import type { Dir, RenderContext } from "../types";
 
@@ -29,10 +29,21 @@ export function runs(text: string, base: Dir): ReactNode {
   );
 }
 
+/**
+ * Direction of a short field: a field that contains any letter of the
+ * document's own script follows the document ("B.Sc. – הנדסת מכונות" reads
+ * right-to-left in a Hebrew CV); a field written entirely in the other
+ * script keeps its own direction ("CSWA – Certified SolidWorks Associate").
+ */
+export function fieldDir(text: string, docDir: Dir): Dir {
+  if (docDir === "rtl") return hasHebrew(text) ? "rtl" : (detectDir(text) ?? "rtl");
+  return /[A-Za-z]/.test(text) ? "ltr" : (detectDir(text) ?? "ltr");
+}
+
 /** A short user-entered field, isolated from its surroundings. */
 export function Field({ text, ctx, className }: { text: string; ctx: RenderContext; className?: string }) {
   if (!text) return null;
-  const dir: Dir = detectDir(text) ?? ctx.dir;
+  const dir: Dir = fieldDir(text, ctx.dir);
   return (
     <bdi dir={dir} className={className}>
       {runs(text, dir)}

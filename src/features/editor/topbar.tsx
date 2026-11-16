@@ -35,6 +35,7 @@ import { docActions } from "@/features/dashboard/actions";
 import { cn } from "@/lib/utils";
 import { editorActions, useEditorStore } from "./store";
 import { HistoryDialog } from "./history-dialog";
+import { useExport } from "@/features/export/use-export";
 
 function SaveStatus() {
   const t = useTranslations("editor.status");
@@ -63,8 +64,9 @@ function SaveStatus() {
   );
 }
 
-export function EditorTopbar() {
+export function EditorTopbar({ flush }: { flush: () => Promise<void> }) {
   const t = useTranslations("editor");
+  const exporter = useExport();
   const locale = useLocale();
   const ui = locale === "he" ? "he" : "en";
   const title = useEditorStore((s) => s.doc!.title);
@@ -136,20 +138,21 @@ export function EditorTopbar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-60">
-            <DropdownMenuItem disabled>
+            <DropdownMenuItem onSelect={() => void flush().then(() => exporter.pdf(useEditorStore.getState().doc!))} data-testid="download-pdf">
               <FileTextIcon />
-              <span className="flex-1">{t("downloadPdf")}</span>
-              <span className="text-xs">{t("exportSoon")}</span>
+              {t("downloadPdf")}
             </DropdownMenuItem>
-            <DropdownMenuItem disabled>
+            <DropdownMenuItem onSelect={() => void exporter.docx(useEditorStore.getState().doc!)} data-testid="download-docx">
               <FileTypeIcon />
-              <span className="flex-1">{t("downloadDocx")}</span>
-              <span className="text-xs">{t("exportSoon")}</span>
+              <span className="grid">
+                <span>{t("downloadDocx")}</span>
+                <span className="text-xs text-muted-foreground">{t("docxHint")}</span>
+              </span>
             </DropdownMenuItem>
-            <DropdownMenuItem disabled>
+            <DropdownMenuItem onSelect={() => void exporter.print(useEditorStore.getState().doc!, flush)} data-testid="print">
               <PrinterIcon />
               <span className="flex-1">{t("print")}</span>
-              <span className="text-xs">{t("exportSoon")}</span>
+              <span className="text-xs text-muted-foreground">Ctrl+P</span>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => void docActions.downloadJson(useEditorStore.getState().doc!)}>
               <FileJsonIcon />

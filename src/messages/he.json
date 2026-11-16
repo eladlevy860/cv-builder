@@ -160,7 +160,6 @@
     "downloadDocx": "Word (פריסה פשוטה)",
     "downloadJson": "גיבוי JSON",
     "print": "הדפסה / שמירה כ-PDF",
-    "exportSoon": "שלב 3",
     "history": "היסטוריית גרסאות",
     "zoomIn": "הגדלה",
     "zoomOut": "הקטנה",
@@ -175,7 +174,14 @@
     "previewRegion": "תצוגה מקדימה חיה",
     "previewHint": "לחיצה על חלק בתצוגה המקדימה מקפיצה אליו בטופס.",
     "versionSaved": "הגרסה נשמרה",
-    "shortcuts": "קיצורים: Ctrl+Z ביטול, Ctrl+Shift+Z ביצוע חוזר, Ctrl+S שמירת גרסה"
+    "shortcuts": "קיצורים: Ctrl+Z ביטול, Ctrl+Shift+Z ביצוע חוזר, Ctrl+S שמירת גרסה",
+    "pdfPreparing": "יוצר PDF…",
+    "pdfReady": "קובץ ה-PDF הורד",
+    "pdfFailed": "לא ניתן ליצור PDF: {message}",
+    "pdfFallback": "יצירת PDF בשרת אינה זמינה כאן, לכן נפתח חלון ההדפסה. בחרו „שמירה כ-PDF”.",
+    "docxHint": "גרסה בעמודה אחת. הפריסה פשוטה יותר מהתבנית.",
+    "docxReady": "קובץ ה-Word הורד",
+    "printBlocked": "אפשרו חלונות קופצים לאתר זה כדי להדפיס."
   },
   "thumb": {
     "label": "תצוגה מקדימה של {title}"

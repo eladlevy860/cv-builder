@@ -13,6 +13,7 @@ import {
   FileTypeIcon,
   LanguagesIcon,
   PencilIcon,
+  PrinterIcon,
   SquareArrowOutUpRightIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -32,6 +33,7 @@ import { otherLanguage } from "@/core/model/operations";
 import type { AnyDocument } from "@/core/model/schema";
 import { getTemplateMeta } from "@/templates/meta";
 import { relativeTime } from "@/lib/relative-time";
+import { useExport } from "@/features/export/use-export";
 import { docActions } from "./actions";
 import { DeleteDialog } from "./delete-dialog";
 import { DocThumbnail } from "./doc-thumbnail";
@@ -40,6 +42,7 @@ import { RenameDialog } from "./rename-dialog";
 export function DocumentCard({ doc }: { doc: AnyDocument }) {
   const t = useTranslations();
   const locale = useLocale();
+  const exporter = useExport();
   const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const meta = getTemplateMeta(doc.templateId);
@@ -116,13 +119,17 @@ export function DocumentCard({ doc }: { doc: AnyDocument }) {
                 {t("card.download")}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
-                <DropdownMenuItem disabled title={t("common.comingSoon")}>
+                <DropdownMenuItem disabled={doc.type !== "cv"} onSelect={() => void exporter.pdf(doc)}>
                   <FileTextIcon />
                   {t("card.downloadPdf")}
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled title={t("common.comingSoon")}>
+                <DropdownMenuItem disabled={doc.type !== "cv"} onSelect={() => void exporter.docx(doc)}>
                   <FileTypeIcon />
                   {t("card.downloadDocx")}
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={doc.type !== "cv"} onSelect={() => void exporter.print(doc)}>
+                  <PrinterIcon />
+                  {t("editor.print")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => run(() => docActions.downloadJson(doc))}>
                   <FileJsonIcon />

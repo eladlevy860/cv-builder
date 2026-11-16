@@ -12,6 +12,7 @@ import { FormPanel } from "./form/form-panel";
 import { PreviewPanel } from "./preview/preview-panel";
 import { editorActions, useEditorStore } from "./store";
 import { EditorTopbar } from "./topbar";
+import { useExport } from "@/features/export/use-export";
 import { saveSnapshot, useAutosave } from "./use-autosave";
 
 type LoadState = "loading" | "ready" | "missing" | "letter";
@@ -57,6 +58,7 @@ export function EditorLoader({ id }: { id: string }) {
 
 function useShortcuts(flush: () => Promise<void>) {
   const t = useTranslations("editor");
+  const exporter = useExport();
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const mod = e.ctrlKey || e.metaKey;
@@ -68,6 +70,9 @@ function useShortcuts(flush: () => Promise<void>) {
       } else if ((key === "z" && e.shiftKey) || key === "y") {
         e.preventDefault();
         editorActions.redo();
+      } else if (key === "p") {
+        e.preventDefault();
+        void exporter.print(useEditorStore.getState().doc!, flush);
       } else if (key === "s") {
         e.preventDefault();
         void flush().then(async () => {
@@ -78,7 +83,7 @@ function useShortcuts(flush: () => Promise<void>) {
     }
     window.addEventListener("keydown", onKey, { capture: true });
     return () => window.removeEventListener("keydown", onKey, { capture: true });
-  }, [flush, t]);
+  }, [flush, t, exporter]);
 }
 
 function Editor() {
@@ -89,7 +94,7 @@ function Editor() {
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col" data-testid="editor">
-      <EditorTopbar />
+      <EditorTopbar flush={flush} />
       <div role="tablist" aria-label={t("tabEdit")} className="flex border-b lg:hidden">
         {(["edit", "preview"] as const).map((k) => (
           <button
