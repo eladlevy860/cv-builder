@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { matchKeywords, type HighlightRange, type Keyword } from "@/core/ats/keywords";
-import { detectDir, splitRuns } from "@/core/bidi";
+import { splitRuns } from "@/core/bidi";
+import { fieldDir } from "@/templates/primitives/text";
 import { cvToPlainText } from "@/core/ats/plain-text";
 import { isDefaultSectionTitle, sectionTitle } from "@/core/i18n-doc/labels";
 import { createItem, createSection, createSkill } from "@/core/model/factory";
@@ -113,8 +114,9 @@ function KeywordChip({ k, onAdd }: { k: Keyword; onAdd?: () => void }) {
  * on screen, runs in the other direction are isolated so "(2023–2025)" and
  * dates read correctly inside Hebrew lines.
  */
-function PlainLine({ line }: { line: string }) {
-  const dir = detectDir(line) ?? "ltr";
+function PlainLine({ line, docDir }: { line: string; docDir: "rtl" | "ltr" }) {
+  // Same rule as template fields: a line with letters of the CV's own script follows the CV's direction.
+  const dir = fieldDir(line, docDir);
   return (
     <p dir={dir} className="min-h-[1lh] whitespace-pre-wrap">
       {splitRuns(line, dir).map((r, i) =>
@@ -285,7 +287,7 @@ export function AtsPanel({ onTemplates }: { onTemplates: () => void }) {
           </div>
           <div className="max-h-[60dvh] overflow-y-auto rounded-lg border bg-card p-3 text-[13px] leading-relaxed tabular-nums" lang={doc.language} data-testid="plain-text">
             {plain.split("\n").map((line, i) => (
-              <PlainLine key={i} line={line} />
+              <PlainLine key={i} line={line} docDir={doc.language === "he" ? "rtl" : "ltr"} />
             ))}
           </div>
         </div>
