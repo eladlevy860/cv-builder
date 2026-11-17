@@ -1,0 +1,64 @@
+/* Elegant: serif type, a centered header and centered headings between hairlines. */
+.tpl-elegant .el-frame {
+  padding: var(--cv-margin);
+}
+.tpl-elegant .el-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-block-end: 0.9em;
+  margin-block-end: var(--cv-gap);
+  border-block-end: 3px double color-mix(in srgb, var(--cv-accent) 70%, white);
+}
+.tpl-elegant .el-photo {
+  width: 26mm;
+  height: 26mm;
+  margin-block-end: 0.8em;
+}
+.tpl-elegant .cv-name {
+  font-size: 2.5em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #1c1917;
+}
+.tpl-elegant .cv-headline {
+  color: var(--cv-accent);
+  letter-spacing: 0.03em;
+}
+.tpl-elegant .cv-contacts {
+  justify-content: center;
+  margin-block-start: 0.65em;
+  color: #44403c;
+}
+.tpl-elegant .cv-heading {
+  font-weight: 500;
+  font-size: 1.18em;
+  letter-spacing: 0.05em;
+}
+/* "Line" style: centered between two hairlines. */
+.tpl-elegant.cv-hs-line .cv-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  border: 0;
+  padding: 0;
+  text-align: center;
+}
+.tpl-elegant.cv-hs-line .cv-heading::before,
+.tpl-elegant.cv-hs-line .cv-heading::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--cv-accent) 45%, transparent);
+}
+.tpl-elegant .cv-entry-title {
+  font-weight: 700;
+  color: #1c1917;
+}
+.tpl-elegant .cv-entry-sub {
+  color: var(--cv-accent);
+}
+.tpl-elegant[lang="en"] .cv-entry-sub {
+  font-style: italic;
+}

@@ -1,0 +1,110 @@
+/*
+ * Modern Sidebar: colored side column (contact, skills, languages) and a
+ * main column. The side column sits at inline-start, so it moves to the
+ * right in Hebrew automatically.
+ */
+.tpl-modern-sidebar .ms-frame {
+  display: grid;
+  grid-template-columns: 33% 1fr;
+  flex-direction: unset;
+}
+.tpl-modern-sidebar .ms-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--cv-accent);
+  color: var(--cv-on-accent);
+  padding: var(--cv-margin) calc(var(--cv-margin) * 0.7);
+}
+.tpl-modern-sidebar .ms-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding: var(--cv-margin);
+}
+.tpl-modern-sidebar .ms-header {
+  margin-block-end: var(--cv-gap);
+}
+.tpl-modern-sidebar .cv-name {
+  color: var(--cv-accent);
+}
+.tpl-modern-sidebar .ms-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+.tpl-modern-sidebar .ms-photo {
+  width: 34mm;
+  height: 34mm;
+  align-self: center;
+  border: 3px solid color-mix(in srgb, var(--cv-on-accent) 60%, transparent);
+}
+.tpl-modern-sidebar .ms-side .cv-contacts {
+  font-size: 0.9em;
+}
+.tpl-modern-sidebar .ms-side .cv-contacts,
+.tpl-modern-sidebar .ms-side .cv-icon,
+.tpl-modern-sidebar .ms-side .cv-contact-label,
+.tpl-modern-sidebar .ms-side .cv-heading,
+.tpl-modern-sidebar .ms-side .cv-entry-title,
+.tpl-modern-sidebar .ms-side .cv-skills-name,
+.tpl-modern-sidebar .ms-side .cv-skill-level,
+.tpl-modern-sidebar .ms-side .cv-entry-sep,
+.tpl-modern-sidebar .ms-side .cv-lang-level {
+  color: var(--cv-on-accent);
+}
+.tpl-modern-sidebar .ms-side .cv-contact {
+  align-items: flex-start;
+  overflow-wrap: anywhere;
+}
+.tpl-modern-sidebar .ms-side .cv-icon {
+  margin-block-start: 0.2em;
+}
+.tpl-modern-sidebar .ms-side .cv-heading {
+  font-size: 1.1em;
+  border-block-end: 1px solid color-mix(in srgb, var(--cv-on-accent) 45%, transparent);
+  padding-block-end: 0.2em;
+  background: none;
+}
+.tpl-modern-sidebar .ms-side .cv-region > .cv-block:first-child + .cv-block > .cv-heading {
+  margin-block-start: calc(var(--cv-gap) * 1.2);
+}
+.tpl-modern-sidebar .ms-side .cv-skills-list li + li {
+  margin-block-start: 0.2em;
+}
+.tpl-modern-sidebar .ms-side .cv-skills + .cv-skills,
+.tpl-modern-sidebar .ms-side .cv-item + .cv-item {
+  margin-block-start: 0.6em;
+}
+.tpl-modern-sidebar .ms-side .cv-dot {
+  background: color-mix(in srgb, var(--cv-on-accent) 30%, transparent);
+}
+.tpl-modern-sidebar .ms-side .cv-dot--on {
+  background: var(--cv-on-accent);
+}
+.tpl-modern-sidebar .ms-side .cv-langs {
+  flex-direction: column;
+}
+.tpl-modern-sidebar .ms-side .cv-lang {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 0.5em;
+}
+.tpl-modern-sidebar .ms-side .cv-lang .cv-entry-sep {
+  display: none;
+}
+.tpl-modern-sidebar .ms-side .cv-lang-level {
+  flex-basis: 100%;
+  font-size: 0.92em;
+  opacity: 0.85;
+}
+.tpl-modern-sidebar .cv-entry-subline {
+  font-weight: 500;
+  color: var(--cv-accent);
+}
+.tpl-modern-sidebar .ms-main .cv-heading {
+  text-transform: none;
+}
