@@ -188,7 +188,11 @@
     "fitting": "Fitting…",
     "fitDone": "Spacing tightened to fit {count, plural, one {one page} other {# pages}}. Press Ctrl+Z to undo.",
     "fitFailed": "It does not fit without making the text too small. Try shortening a few items.",
-    "clipWarning": "An item is taller than a whole page and gets cut off. Split it into shorter items."
+    "clipWarning": "An item is taller than a whole page and gets cut off. Split it into shorter items.",
+    "panelReview": "Review",
+    "panelAts": "ATS",
+    "cloneTo": "Copy in {language}",
+    "cloneHint": "Creates a copy of this CV in {language} and opens it. Translate the text yourself; dates, layout and design carry over."
   },
   "thumb": {
     "label": "Preview of {title}"
@@ -423,5 +427,136 @@
       "two": "2 columns",
       "photo": "With photo"
     }
+  },
+  "writing": {
+    "help": "Writing help",
+    "helpFor": "Writing help for {title}",
+    "tabs": {
+      "tips": "Tips",
+      "verbs": "Action words",
+      "examples": "Examples"
+    },
+    "tipsTitle": "What recruiters look for",
+    "verbsHint": "Click a word to copy it, then start a bullet with it. The second line is the same word in the other language.",
+    "verbCategories": {
+      "design": "Design & build",
+      "analyze": "Analysis & testing",
+      "improve": "Improvement",
+      "lead": "Leadership",
+      "deliver": "Execution",
+      "communicate": "Communication"
+    },
+    "copied": "Copied: {word}",
+    "fieldsLabel": "Field",
+    "fields": {
+      "mechanical": "Mechanical engineering",
+      "student": "Students & graduates",
+      "general": "General"
+    },
+    "examplesHint": "Add puts the example in as an editable bullet. Replace the [brackets] with your own details.",
+    "summaryExamplesHint": "Add puts the example at the end of your summary. Replace the [brackets] with your own details.",
+    "addTo": "Add to",
+    "newItem": "A new item",
+    "untitled": "Untitled",
+    "add": "Add",
+    "addExample": "Add this example",
+    "added": "Added. Replace the [brackets] with your own details.",
+    "hints": {
+      "summaryLength": "{length} characters (aim for {min}–{max}).",
+      "summaryShort": "A bit short: add your main tools and the role you want.",
+      "summaryLong": "Long: recruiters skim, so keep it to 2–4 lines.",
+      "bulletCount": "{count, plural, one {# bullet} other {# bullets}} ({min}–{max} work well for a role).",
+      "asBullets": "Bullets are easier to scan than a paragraph. Use the list button in the toolbar.",
+      "bulletLong": "Bullet {n} is long ({length} characters). Aim for under {max}.",
+      "bulletShort": "Bullet {n} is very short. Add what you did and what came of it.",
+      "bulletWeak": "Bullet {n} starts with “{phrase}”. Start with an action word instead, such as {example}.",
+      "paragraphWeak": "Starts with “{phrase}”. Start with an action word instead, such as {example}.",
+      "verbExample": {
+        "he": "תכנון, הובלת or שיפור",
+        "en": "Designed, Led or Improved"
+      }
+    }
+  },
+  "review": {
+    "intro": "How complete your CV is. Fix the items below, starting from the top.",
+    "level": {
+      "great": "Looking strong",
+      "good": "Almost there",
+      "low": "Needs work"
+    },
+    "toFix": "To fix",
+    "fix": "Fix",
+    "more": "…and {count} more",
+    "done": "Done ({count})",
+    "allDone": "Everything on the checklist is done.",
+    "note": "The score is a guide, not a grade: a short, focused CV can be better than one that ticks every box.",
+    "listSeparator": ", ",
+    "fields": {
+      "name": "name",
+      "email": "email",
+      "phone": "phone"
+    },
+    "checks": {
+      "contact": "Contact details",
+      "headline": "Headline under your name",
+      "summary": "Summary",
+      "experience": "Experience or projects",
+      "bullets": "Bullets per role",
+      "bulletQuality": "Bullet wording and length",
+      "dates": "Dates",
+      "education": "Education",
+      "skills": "Skills",
+      "emptySections": "No empty sections",
+      "pages": "Length"
+    },
+    "issues": {
+      "contactMissing": "Missing: {fields}.",
+      "headlineMissing": "Add a short headline, e.g. your target role.",
+      "summaryMissing": "Add a Summary section: recruiters read it first.",
+      "summaryEmpty": "The summary is empty.",
+      "summaryShort": "The summary is short ({length} characters). Aim for 200–600.",
+      "summaryLong": "The summary is long ({length} characters). Aim for under 600.",
+      "experienceMissing": "Add at least one job or project.",
+      "bulletsFew": "{name}: {count, plural, =0 {no bullets} one {only one bullet} other {# bullets}}. Add what you achieved.",
+      "bulletsMany": "{name}: {count} bullets. Keep the strongest 4–6.",
+      "bulletsAsParagraph": "{name}: written as a paragraph. Bullets are easier to scan.",
+      "bulletWeak": "{name}: a bullet starts with “{phrase}”.",
+      "bulletLong": "{name}: a bullet is {length} characters long.",
+      "bulletShort": "{name}: a bullet is very short.",
+      "dateStartMissing": "{name}: no start date.",
+      "dateEndMissing": "{name}: no end date (or tick “Present”).",
+      "educationMissing": "Add your education.",
+      "skillsMissing": "Add your main skills and tools.",
+      "sectionEmpty": "“{title}” is empty. Fill it in or hide it.",
+      "pagesTooMany": "{pages} pages. Most recruiters prefer one or two.",
+      "pagesSparse": "The last of {pages} pages holds only a few lines."
+    }
+  },
+  "ats": {
+    "title": "ATS tools",
+    "readiness": "ATS readiness",
+    "templateOk": "{name} is single-column and ATS-friendly.",
+    "templateColumns": "This template has two columns or graphic blocks. Some applicant-tracking systems read them in the wrong order; for online applications, an ATS-friendly template is safer.",
+    "switchTemplate": "Templates",
+    "photo": "Your photo is shown. ATS systems ignore photos, and many companies outside Israel prefer CVs without one.",
+    "customTitles": "Custom section titles: {titles}. Standard titles (Experience, Education, Skills) are easier for ATS systems to recognize.",
+    "views": {
+      "match": "Job-ad match",
+      "text": "Plain-text view"
+    },
+    "adLabel": "Job ad",
+    "adPlaceholder": "Paste the job description here (Hebrew or English)",
+    "adHint": "Kept in this browser only. Hebrew words match with or without prefixes (ב, ה, ו, ל, מ, ש, כ), plural endings and geresh.",
+    "matchScore": "Keyword match",
+    "missing": "Missing from your CV ({count})",
+    "missingHint": "Add the ones you really have, in the same spelling as the ad. + adds a tool to your skills.",
+    "matched": "Found in your CV ({count})",
+    "adHighlighted": "The ad, highlighted",
+    "noKeywords": "No keywords found yet. Paste the full job description.",
+    "addSkill": "Add {skill} to skills",
+    "skillAdded": "Added {skill} to your skills",
+    "textHint": "What an applicant-tracking system extracts: text only, in reading order.",
+    "copy": "Copy",
+    "copied": "Copied the plain text"
   }
 }

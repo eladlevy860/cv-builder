@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -25,6 +25,7 @@ export function RichTextEditor({
   hint,
   testId,
   minHeight = "5rem",
+  footer,
 }: {
   label: string;
   value: RichText;
@@ -32,6 +33,8 @@ export function RichTextEditor({
   hint?: string;
   testId?: string;
   minHeight?: string;
+  /** Live feedback under the editor (length hints). */
+  footer?: ReactNode;
 }) {
   const t = useTranslations("rte");
   const lang = useDocLang();
@@ -146,6 +149,7 @@ export function RichTextEditor({
         </div>
         <EditorContent editor={editor} className="rte px-3 py-2 text-sm" style={{ minHeight }} />
       </div>
+      {footer}
       {hint && (
         <p id={`${id}-hint`} className="text-xs text-muted-foreground">
           {hint}

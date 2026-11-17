@@ -8,6 +8,7 @@ import type { CvDocument, Section, SectionItem, SectionOf } from "@/core/model/s
 import { editorActions } from "../store";
 import { DateRangeField, LevelSelect, SkillsInput, TextField, YearMonthField } from "./fields";
 import { RichTextEditor } from "./rich-text-editor";
+import { BulletHints } from "../writing/length-hints";
 import { Label } from "@/components/ui/label";
 import { useId } from "react";
 
@@ -73,7 +74,13 @@ function ExperienceForm({ sectionId, item }: { sectionId: string; item: ItemOf<"
       <p className="-mt-1 text-xs text-muted-foreground">{t("organizationHint")}</p>
       <TextField label={t("location")} value={item.location} onChange={(v) => set("location", v)} />
       <DateRangeField value={item.dates} onChange={(v) => set("dates", v)} testId="field-dates" />
-      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} testId="field-description" />
+      <RichTextEditor
+        label={t("description")}
+        value={item.description}
+        onChange={(v) => set("description", v)}
+        testId="field-description"
+        footer={<BulletHints value={item.description} role />}
+      />
     </div>
   );
 }
@@ -93,7 +100,7 @@ function EducationForm({ sectionId, item }: { sectionId: string; item: ItemOf<"e
       </Grid2>
       <DateRangeField value={item.dates} onChange={(v) => set("dates", v)} />
       <TextField label={t("grade")} value={item.grade} onChange={(v) => set("grade", v)} />
-      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} />
+      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} footer={<BulletHints value={item.description} />} />
     </div>
   );
 }
@@ -110,7 +117,7 @@ function MilitaryForm({ sectionId, item }: { sectionId: string; item: ItemOf<"mi
       </Grid2>
       <DateRangeField value={item.dates} onChange={(v) => set("dates", v)} />
       <TextField label={t("distinctions")} value={item.distinctions} onChange={(v) => set("distinctions", v)} />
-      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} />
+      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} footer={<BulletHints value={item.description} />} />
     </div>
   );
 }
@@ -126,7 +133,7 @@ function ProjectForm({ sectionId, item }: { sectionId: string; item: ItemOf<"pro
       </Grid2>
       <TextField label={t("link")} value={item.link} onChange={(v) => set("link", v)} ltr type="url" />
       <DateRangeField value={item.dates} onChange={(v) => set("dates", v)} />
-      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} />
+      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} footer={<BulletHints value={item.description} />} />
     </div>
   );
 }
@@ -254,7 +261,7 @@ function CustomForm({ sectionId, item }: { sectionId: string; item: ItemOf<"cust
         <TextField label={t("link")} value={item.link} onChange={(v) => set("link", v)} ltr type="url" />
       </Grid2>
       <DateRangeField value={item.dates} onChange={(v) => set("dates", v)} />
-      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} />
+      <RichTextEditor label={t("description")} value={item.description} onChange={(v) => set("description", v)} footer={<BulletHints value={item.description} />} />
     </div>
   );
 }

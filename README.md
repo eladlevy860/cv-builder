@@ -2,11 +2,12 @@
 
 A local-first web app for writing CVs and cover letters in **Hebrew (RTL)** and **English (LTR)**. Right-to-left support is built in from the start, not added afterwards. All data stays in your browser (IndexedDB). You can back everything up to JSON and restore it.
 
-> **Status: Phase 4 (Templates and design) done.**
+> **Status: Phase 5 (Writing help and ATS tools) done.**
 > - **Phase 1:** the app shell in Hebrew and English with RTL mirroring, data model and migrations, Dexie storage, the dashboard, and JSON backup/import.
 > - **Phase 2:** the split-screen editor, every section type including Military Service, drag-and-drop, autosave, undo/redo, version history, a paginated live preview, and three templates.
 > - **Phase 3:** PDF via headless Chromium, a "Print / Save as PDF" fallback, Word export with right-to-left Hebrew paragraphs, and the bidi test strings checked in the preview, the PDF and the DOCX.
 > - **Phase 4:** all ten templates, a design panel, a template drawer showing your own CV in every template, real thumbnails on the dashboard, and page-length warnings with "fit on fewer pages".
+> - **Phase 5:** writing help per section (tips, bilingual action words, example bullets that insert), live length hints, a completeness score with links to each issue, an ATS plain-text view, Hebrew-aware job-ad keyword matching, and "copy in the other language" from the editor.
 
 ## Requirements
 
@@ -121,6 +122,8 @@ src/
     bidi/                   direction detection, LTR-token splitting, Israeli phone formatting
     samples/                Hebrew and English sample CVs (the Hebrew one is the bidi fixture)
     render/entries.ts       format-independent view of items (shared by templates, DOCX, ATS text)
+    writing/                tips, action verbs and examples (content.ts), length/weak-opening checks, completeness score
+    ats/                    plain-text extraction, Hebrew-aware job-ad keyword matching
   templates/
     meta.ts                 metadata for all 10 templates
     registry.ts             the ten template definitions
@@ -133,7 +136,8 @@ src/
   server/pdf.ts             headless Chromium PDF rendering (used by app/api/pdf)
   features/export/          client export actions (PDF, DOCX, print)
   features/dashboard/       dashboard UI (cards, create flow, dialogs)
-  features/editor/          store (history), autosave, form panels, design panel, template drawer, preview, topbar
+  features/editor/          store (history), autosave, form panels, design panel, template drawer, writing help,
+                            review (score) and ATS tabs, preview, topbar
   features/thumbnail/       real first-page thumbnails (dashboard, drawer, create dialog, landing)
   components/ui/            shadcn/ui components
   components/shell/         header, locale switcher, theme toggle, providers
@@ -194,6 +198,18 @@ The UI only talks to `StorageAdapter` (`src/core/storage/adapter.ts`). `DexieSto
 - **Design panel** (`design/design-panel.tsx`, the "Design" tab or button): accent color (template presets, a color picker or a hex code), body and heading fonts, font size, line spacing, section heading style, space between sections, page margins, A4 or Letter, photo and contact icons on or off, date format, and "היום"/"כיום" for ongoing periods. Every change is one undo step. "Reset to the template's design" restores the template's defaults and keeps your content and photo setting.
 - **Template drawer** (`design/template-drawer.tsx`): every thumbnail is your own CV rendered in that template by the same renderer as the preview, with filters (ATS-friendly, 1 or 2 columns, photo). Picking a template applies it at once, and Ctrl+Z switches back. In Hebrew the drawer opens from the right, over the form, so the full preview stays visible.
 - **Page-length warnings:** the paginator reports how full the last page is and whether anything is cut off. When the last page holds only a few lines, the preview offers "Fit on N pages". It tries progressively tighter settings off-screen with the real renderer (space between sections first, then line spacing and margins, font size last, never below 9pt) and applies the first that fits, as a single undoable step. An item taller than a whole page is reported as cut off, and more than two pages gets a gentle warning.
+
+## Writing help and ATS tools
+
+- **Writing help** (the light-bulb button on a section): what recruiters look for, an action-word library in both languages (click to copy; Hebrew uses action nouns such as תכנון / הובלת, as Israeli CVs do), and example bullets for mechanical engineering, students and general roles. "Add" inserts an example as an editable bullet into the chosen item (or a new one) and is one undo step. Numbers in [brackets] are placeholders. The content lives in `src/core/writing/content.ts`.
+- **Length hints** under the summary and every description: summary length (200–600 characters), bullets per role (2–6), bullets over 180 characters, and bullets that open with weak phrases ("Responsible for", "אחראי על", "השתתפות ב…").
+- **Review tab:** a completeness score (contact details, headline, summary, experience, bullets per role, wording, dates, education, skills, empty sections, page count from the live preview) with a "Fix" link on every issue that opens the right section and item.
+- **ATS tab:**
+  - readiness notes (two-column templates, photo, non-standard section titles);
+  - a plain-text view: what an applicant-tracking system extracts, built from the same entry model as the templates and Word export;
+  - job-ad matching: paste an ad in Hebrew or English to see matched and missing keywords, a match score, and the ad with highlights. Missing known tools can be added to your skills with one click. The ad is kept per document in this browser.
+- **Hebrew keyword matching** (`src/core/ats/keywords.ts`): words are normalized (niqqud, geresh/gershayim and quotes removed, final letters folded), then reduced to candidate stems by stripping up to three prefix letters (ה ו ב ל מ ש כ) and one common ending (ים, ות, ית, ה, ת, י), never below three letters. Two words match when their stems overlap, so "בתכנון" matches "תכנון" and צה"ל matches צה״ל. Generic job-ad words (ניסיון, דרישות, יתרון…) are ignored, known tools and phrases (SolidWorks, GD&T, "ניהול פרויקטים") rank first, and Hebrew spellings of tools (מטלב, סולידוורקס) map to their Latin names. Unit tests are in `tests/unit/writing.test.ts`.
+- **Copy in the other language** (top bar): creates a copy in Hebrew or English with section titles, fonts and the "present" label switched, then opens it for you to translate.
 
 ## Templates and pagination
 

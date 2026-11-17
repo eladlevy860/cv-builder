@@ -8,7 +8,9 @@ import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getStorage } from "@/core/storage";
 import { cn } from "@/lib/utils";
+import { AtsPanel } from "./ats/ats-panel";
 import { DesignPanel } from "./design/design-panel";
+import { ReviewPanel, useCompleteness } from "./review/review-panel";
 import { TemplateDrawer } from "./design/template-drawer";
 import { FormPanel } from "./form/form-panel";
 import { PreviewPanel } from "./preview/preview-panel";
@@ -88,12 +90,26 @@ function useShortcuts(flush: () => Promise<void>) {
   }, [flush, t, exporter]);
 }
 
+type Panel = "content" | "design" | "review" | "ats";
+const PANELS: Panel[] = ["content", "design", "review", "ats"];
+
+/** Score badge on the Review tab. */
+function ScoreBadge() {
+  const { score } = useCompleteness();
+  const color = score >= 85 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200" : score >= 60 ? "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200" : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200";
+  return (
+    <span className={cn("ms-1.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums", color)} data-testid="score-badge">
+      {score}
+    </span>
+  );
+}
+
 function Editor() {
   const t = useTranslations("editor");
   const flush = useAutosave();
   useShortcuts(flush);
   const [tab, setTab] = useState<"edit" | "preview">("edit");
-  const [panel, setPanel] = useState<"content" | "design">("content");
+  const [panel, setPanel] = useState<Panel>("content");
   const [templatesOpen, setTemplatesOpen] = useState(false);
 
   return (
@@ -131,7 +147,7 @@ function Editor() {
           data-testid="form-panel"
         >
           <div role="tablist" aria-label={t("panels")} className="sticky top-0 z-10 flex gap-1 border-b bg-background/95 px-4 pt-2 backdrop-blur">
-            {(["content", "design"] as const).map((k) => (
+            {PANELS.map((k) => (
               <button
                 key={k}
                 role="tab"
@@ -145,12 +161,23 @@ function Editor() {
                 )}
                 data-testid={`panel-tab-${k}`}
               >
-                {k === "content" ? t("panelContent") : t("panelDesign")}
+                {t(`panel${k === "ats" ? "Ats" : k[0].toUpperCase() + k.slice(1)}` as "panelContent")}
+                {k === "review" && <ScoreBadge />}
               </button>
             ))}
           </div>
           <div role="tabpanel" id={`panel-${panel}`} aria-labelledby={`panel-tab-${panel}`}>
-            {panel === "content" ? <FormPanel /> : <DesignPanel onChangeTemplate={() => setTemplatesOpen(true)} />}
+            {panel === "content" && <FormPanel />}
+            {panel === "design" && <DesignPanel onChangeTemplate={() => setTemplatesOpen(true)} />}
+            {panel === "review" && (
+              <ReviewPanel
+                onGo={(target) => {
+                  useEditorStore.getState().focus(target.sectionId, target.itemId ?? null, true);
+                  setPanel("content");
+                }}
+              />
+            )}
+            {panel === "ats" && <AtsPanel onTemplates={() => setTemplatesOpen(true)} />}
           </div>
         </section>
         <section aria-label={t("previewRegion")} className={cn("min-h-0 min-w-0", tab !== "preview" && "hidden lg:block")}>

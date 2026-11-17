@@ -21,7 +21,11 @@ export function FormPanel() {
   const doc = useEditorStore((s) => s.doc!);
   const activeSectionId = useEditorStore((s) => s.activeSectionId);
   const focusNonce = useEditorStore((s) => s.focusNonce);
-  const [open, setOpen] = useState<string[]>([BASICS_ID]);
+  // Mounted by a jump from another tab: open the target section right away.
+  const [open, setOpen] = useState<string[]>(() => {
+    const active = useEditorStore.getState().activeSectionId;
+    return active && active !== BASICS_ID ? [BASICS_ID, active] : [BASICS_ID];
+  });
   const [lastNonce, setLastNonce] = useState(focusNonce);
 
   // Preview click → open that section (state adjusted during render, no effect needed).

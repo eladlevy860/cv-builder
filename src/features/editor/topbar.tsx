@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import {
   ArrowLeftIcon,
@@ -10,6 +12,7 @@ import {
   FileJsonIcon,
   FileTextIcon,
   FileTypeIcon,
+  LanguagesIcon,
   LayoutTemplateIcon,
   LoaderIcon,
   PaletteIcon,
@@ -29,6 +32,7 @@ import { docActions } from "@/features/dashboard/actions";
 import { cn } from "@/lib/utils";
 import { editorActions, useEditorStore } from "./store";
 import { HistoryDialog } from "./history-dialog";
+import { otherLanguage } from "@/core/model/operations";
 import { useExport } from "@/features/export/use-export";
 
 function SaveStatus() {
@@ -74,6 +78,18 @@ export function EditorTopbar({
   const title = useEditorStore((s) => s.doc!.title);
   const canUndo = useEditorStore((s) => s.past.length > 0);
   const canRedo = useEditorStore((s) => s.future.length > 0);
+  const docLanguage = useEditorStore((s) => s.doc!.language);
+  const tc = useTranslations("common");
+  const router = useRouter();
+  const target = otherLanguage(docLanguage);
+  const targetName = target === "he" ? tc("hebrew") : tc("english");
+
+  async function cloneToOther() {
+    await flush();
+    const copy = await docActions.cloneToOtherLanguage(useEditorStore.getState().doc!);
+    toast.success(t("cloneHint", { language: targetName }));
+    router.push(`/editor/${copy.id}`);
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-b bg-background px-3 py-2">
@@ -102,6 +118,17 @@ export function EditorTopbar({
         </Button>
         <HistoryDialog />
         <span className="mx-1 h-5 w-px bg-border" aria-hidden />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => void cloneToOther()}
+          title={t("cloneHint", { language: targetName })}
+          data-testid="clone-language"
+        >
+          <LanguagesIcon />
+          <span className="hidden xl:inline">{t("cloneTo", { language: targetName })}</span>
+          <span className="sr-only xl:hidden">{t("cloneTo", { language: targetName })}</span>
+        </Button>
         <Button variant="outline" size="sm" onClick={onTemplates} data-testid="template-menu">
           <LayoutTemplateIcon />
           <span className="hidden md:inline">{t("template")}</span>

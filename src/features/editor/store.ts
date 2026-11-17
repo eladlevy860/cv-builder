@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { produce, type Draft } from "immer";
 import type { CvDocument } from "@/core/model/schema";
+import type { LayoutStats } from "@/templates/paginator";
 
 export type SaveStatus = "saved" | "dirty" | "saving" | "error";
 
@@ -24,6 +25,8 @@ export type EditorState = {
   activeItemId: string | null;
   /** Bumped to ask the form to scroll to the active section/item. */
   focusNonce: number;
+  /** Page count and last-page fill of the live preview (not part of the document or history). */
+  layout: LayoutStats | null;
 
   load(doc: CvDocument): void;
   /**
@@ -38,6 +41,7 @@ export type EditorState = {
   redo(): void;
   setSaveStatus(status: SaveStatus, savedRevision?: number): void;
   focus(sectionId: string | null, itemId?: string | null, scroll?: boolean): void;
+  setLayout(layout: LayoutStats): void;
 };
 
 let lastKey: string | undefined;
@@ -54,6 +58,7 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
   activeSectionId: null,
   activeItemId: null,
   focusNonce: 0,
+  layout: null,
 
   load(doc) {
     lastKey = undefined;
@@ -67,6 +72,7 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
       lastSavedAt: null,
       activeSectionId: null,
       activeItemId: null,
+      layout: null,
     });
   },
 
@@ -136,6 +142,12 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
       if (get().revision !== savedRevision) patch.saveStatus = "dirty";
     }
     set(patch);
+  },
+
+  setLayout(layout) {
+    const prev = get().layout;
+    if (prev && prev.pages === layout.pages && prev.lastPageFill === layout.lastPageFill && prev.clipped === layout.clipped) return;
+    set({ layout });
   },
 
   focus(sectionId, itemId = null, scroll = false) {

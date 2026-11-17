@@ -10,6 +10,7 @@ import {
   EllipsisVerticalIcon,
   EyeIcon,
   EyeOffIcon,
+  LightbulbIcon,
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -44,6 +45,8 @@ import { editorActions, useEditorStore } from "../store";
 import { TextField } from "./fields";
 import { findItem, ItemForm } from "./item-forms";
 import { RichTextEditor } from "./rich-text-editor";
+import { SummaryHint } from "../writing/length-hints";
+import { WritingHelp, hasWritingHelp } from "../writing/writing-help";
 import { DragHandle, moveInArray, SortableItem, SortableList, type HandleProps } from "./sortable";
 
 type ItemSection = Exclude<Section, { type: "summary" }>;
@@ -86,8 +89,10 @@ export function SectionPanel({
   const t = useTranslations("sections");
   const tf = useTranslations("fields");
   const tc = useTranslations("common");
+  const tw = useTranslations("writing");
   const doc = useEditorStore((s) => s.doc!);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const title = sectionTitle(section, doc.language);
   const columns = getTemplateMeta(doc.templateId).columns;
 
@@ -107,6 +112,23 @@ export function SectionPanel({
             {!section.visible && <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{t("hidden")}</span>}
           </span>
         </AccordionTrigger>
+        {hasWritingHelp(section.type) && (
+          <Button
+            variant={helpOpen ? "secondary" : "ghost"}
+            size="icon-sm"
+            aria-label={tw("helpFor", { title })}
+            title={tw("help")}
+            aria-pressed={helpOpen}
+            onClick={() => {
+              // Opening the help also opens the section.
+              if (!helpOpen) useEditorStore.getState().focus(section.id, null, true);
+              setHelpOpen((o) => !o);
+            }}
+            data-testid="writing-help-toggle"
+          >
+            <LightbulbIcon className={cn(helpOpen && "text-amber-600")} />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon-sm"
@@ -142,6 +164,7 @@ export function SectionPanel({
         </DropdownMenu>
       </AccordionHeader>
       <AccordionContent className="grid gap-4">
+        {helpOpen && <WritingHelp section={section} />}
         <div className="grid gap-3 sm:grid-cols-2">
           <TextField
             label={t("title")}
@@ -161,6 +184,7 @@ export function SectionPanel({
             value={section.content}
             minHeight="7rem"
             testId="field-summary"
+            footer={<SummaryHint value={section.content} />}
             onChange={(v) =>
               updateSection(
                 section.id,

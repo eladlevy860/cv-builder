@@ -52,6 +52,10 @@ export function PreviewPanel({ onJump }: { onJump?: () => void }) {
   };
 
   const onPageCount = useCallback((n: number) => setPages(n), []);
+  const onStats = useCallback((s: LayoutStats) => {
+    setStats(s);
+    useEditorStore.getState().setLayout(s);
+  }, []);
 
   function startFit(target: number) {
     const current = useEditorStore.getState().doc!;
@@ -182,7 +186,7 @@ export function PreviewPanel({ onJump }: { onJump?: () => void }) {
           <PagedDocument
             doc={deferredDoc}
             onPageCount={onPageCount}
-            onStats={setStats}
+            onStats={onStats}
             renderPage={(page, i, count) => (
               <div className="relative" data-testid="preview-page">
                 {/* Zoom is applied per page so the paginator always measures at 100%. */}
